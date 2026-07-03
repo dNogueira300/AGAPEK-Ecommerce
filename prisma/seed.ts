@@ -12,8 +12,15 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({ adapter });
 
-// Imagen genérica reutilizable (se reemplaza luego desde el panel).
-const IMG = "/productos/generico.svg";
+// Imágenes de prueba (se repiten; se reemplazan luego desde el panel).
+const PRODUCT_IMAGES = [
+  "/productos/p1.webp",
+  "/productos/p2.webp",
+  "/productos/p3.webp",
+  "/productos/p4.webp",
+  "/productos/p5.webp",
+  "/productos/p6.webp",
+];
 
 const MARCAS = [
   "Beauty of Joseon",
@@ -72,30 +79,33 @@ async function main() {
     const precio = 25 + (i % 10) * 5;
     const codigo = `AGK-${String(i).padStart(4, "0")}`;
 
-    await prisma.producto.upsert({
+    const imagen = PRODUCT_IMAGES[(i - 1) % PRODUCT_IMAGES.length];
+    const datos = {
+      nombre: `Producto Skincare ${i}`,
+      slug: `producto-skincare-${i}`,
+      descripcionCorta: "Producto coreano original para el cuidado de la piel.",
+      descripcion:
+        "Fórmula suave con ingredientes coreanos, ideal para tu rutina diaria de skincare.",
+      modoUso: "Aplicar sobre el rostro limpio, mañana y noche.",
+      precio,
+      precioOferta: i % 4 === 0 ? precio - 5 : null,
+      stock: i % 7 === 0 ? 0 : 20 + i,
+      destacado: i % 3 === 0,
+      nuevo: i % 5 === 0,
+      tipoPiel: [TIPOS_PIEL[i % TIPOS_PIEL.length]],
+      necesidad: [NECESIDADES[i % NECESIDADES.length]],
+      marcaId: marca.id,
+      categoriaId: categoria.id,
+    };
+    const p = await prisma.producto.upsert({
       where: { codigo },
       update: {},
-      create: {
-        codigo,
-        nombre: `Producto Skincare ${i}`,
-        slug: `producto-skincare-${i}`,
-        descripcionCorta: "Producto coreano original para el cuidado de la piel.",
-        descripcion:
-          "Fórmula suave con ingredientes coreanos, ideal para tu rutina diaria de skincare.",
-        modoUso: "Aplicar sobre el rostro limpio, mañana y noche.",
-        precio,
-        precioOferta: i % 4 === 0 ? precio - 5 : null,
-        stock: i % 7 === 0 ? 0 : 20 + i,
-        destacado: i % 3 === 0,
-        nuevo: i % 5 === 0,
-        tipoPiel: [TIPOS_PIEL[i % TIPOS_PIEL.length]],
-        necesidad: [NECESIDADES[i % NECESIDADES.length]],
-        marcaId: marca.id,
-        categoriaId: categoria.id,
-        imagenes: {
-          create: [{ url: IMG, alt: `Producto Skincare ${i}`, orden: 0 }],
-        },
-      },
+      create: { codigo, ...datos },
+    });
+    // Refresca la imagen (idempotente al re-seedear).
+    await prisma.productoImagen.deleteMany({ where: { productoId: p.id } });
+    await prisma.productoImagen.create({
+      data: { productoId: p.id, url: imagen, alt: datos.nombre, orden: 0 },
     });
   }
 
@@ -118,16 +128,15 @@ async function main() {
     });
   }
 
-  // Banners del hero (solo si aún no hay).
-  if ((await prisma.banner.count()) === 0) {
-    await prisma.banner.createMany({
-      data: [
-        { titulo: "Tu rutina coreana empieza aquí", imagenUrl: "/banners/banner-1.svg", enlace: "/catalogo", orden: 0 },
-        { titulo: "Bloom & Glow", imagenUrl: "/banners/banner-2.svg", enlace: "/marcas", orden: 1 },
-        { titulo: "Cuida tu piel con gentileza y amor", imagenUrl: "/banners/banner-3.svg", enlace: "/rutinas", orden: 2 },
-      ],
-    });
-  }
+  // Banners del hero (idempotente: refresca los de prueba).
+  await prisma.banner.deleteMany({});
+  await prisma.banner.createMany({
+    data: [
+      { titulo: "Tu rutina coreana empieza aquí", imagenUrl: "/banners/foto-1.webp", enlace: "/catalogo", orden: 0 },
+      { titulo: "Descubre las marcas de Corea", imagenUrl: "/banners/foto-2.webp", enlace: "/marcas", orden: 1 },
+      { titulo: "Cuida tu piel con gentileza y amor", imagenUrl: "/banners/foto-3.webp", enlace: "/rutinas", orden: 2 },
+    ],
+  });
 
   // Testimonios (solo si aún no hay).
   if ((await prisma.testimonio.count()) === 0) {
