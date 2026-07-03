@@ -33,11 +33,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protege el panel administrador: sin sesión → redirige a login.
-  if (!user && request.nextUrl.pathname.startsWith("/admin")) {
+  // Rutas que exigen sesión → sin usuario redirige a login.
+  const protegidas = ["/admin", "/perfil", "/checkout"];
+  const path = request.nextUrl.pathname;
+  if (!user && protegidas.some((p) => path === p || path.startsWith(`${p}/`))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
+    url.searchParams.set("redirect", path);
     return NextResponse.redirect(url);
   }
 

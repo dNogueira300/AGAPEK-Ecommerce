@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/tienda/site-header";
 import { SiteFooter } from "@/components/tienda/site-footer";
+import { getSesionUI } from "@/lib/auth";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,18 +26,20 @@ export const metadata: Metadata = {
     "Skincare coreano para la piel loretana. Compra productos originales, arma tu rutina y recibe asesoría personalizada por WhatsApp.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const sesion = await getSesionUI();
+
   return (
     <html
       lang="es"
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        <SiteHeader />
+        <SiteHeader sesion={sesion} />
         <main className="flex-1">{children}</main>
         <SiteFooter />
       </body>

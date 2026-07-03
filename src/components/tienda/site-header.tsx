@@ -15,11 +15,16 @@ const NAV_LINKS = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-export function SiteHeader() {
+interface SesionHeader {
+  nombre: string;
+}
+
+export function SiteHeader({ sesion }: { sesion: SesionHeader | null }) {
   const [open, setOpen] = useState(false);
   const items = useCart((s) => s.items);
   const hydrated = useCartHydrated();
   const cartCount = hydrated ? contarItems(items) : 0;
+  const primerNombre = sesion?.nombre.split(" ")[0];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -78,11 +83,11 @@ export function SiteHeader() {
             <ShoppingBag className="size-5" />
           </IconButton>
           <Link
-            href="/perfil"
+            href={sesion ? "/perfil" : "/login"}
             className="ml-1 hidden items-center gap-2 rounded-full bg-secondary px-3.5 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-accent sm:inline-flex"
           >
             <User className="size-4" />
-            Mi perfil
+            {sesion ? (primerNombre ?? "Mi perfil") : "Ingresar"}
           </Link>
 
           {/* Mobile toggle */}
