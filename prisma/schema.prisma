@@ -179,6 +179,8 @@ model Configuracion {
 model Banner {
   id        String  @id @default(cuid())
   titulo    String?
+  subtitulo String?
+  cta       String?
   imagenUrl String
   enlace    String?
   orden     Int     @default(0)

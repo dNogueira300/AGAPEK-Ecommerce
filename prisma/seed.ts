@@ -132,9 +132,33 @@ async function main() {
   await prisma.banner.deleteMany({});
   await prisma.banner.createMany({
     data: [
-      { titulo: "Tu rutina coreana empieza aquí", imagenUrl: "/banners/foto-1.webp", enlace: "/catalogo", orden: 0 },
-      { titulo: "Descubre las marcas de Corea", imagenUrl: "/banners/foto-2.webp", enlace: "/marcas", orden: 1 },
-      { titulo: "Cuida tu piel con gentileza y amor", imagenUrl: "/banners/foto-3.webp", enlace: "/rutinas", orden: 2 },
+      {
+        titulo: "El secreto del acabado jugoso y saludable de Corea",
+        subtitulo:
+          "Texturas ultra ligeras de rápida absorción que hidratan a nivel celular. Logra un brillo natural que provoca tocar desde adentro.",
+        cta: "Comprar ahora",
+        imagenUrl: "/banners/foto-1.webp",
+        enlace: "/catalogo",
+        orden: 0,
+      },
+      {
+        titulo: "Descubre las marcas más queridas de Corea",
+        subtitulo:
+          "Beauty of Joseon, COSRX, Anua, Round Lab y más. Originales, seleccionadas con cariño para tu piel.",
+        cta: "Ver marcas",
+        imagenUrl: "/banners/foto-2.webp",
+        enlace: "/marcas",
+        orden: 1,
+      },
+      {
+        titulo: "Cuida tu piel con gentileza y amor",
+        subtitulo:
+          "Arma tu rutina paso a paso según tu tipo de piel y recibe asesoría personalizada por WhatsApp.",
+        cta: "Arma tu rutina",
+        imagenUrl: "/banners/foto-3.webp",
+        enlace: "/rutinas",
+        orden: 2,
+      },
     ],
   });
 
