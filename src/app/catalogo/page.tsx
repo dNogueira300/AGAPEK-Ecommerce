@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ProductCard, type ProductCardData } from "@/components/tienda/product-card";
 import {
@@ -19,16 +20,28 @@ const NECESIDADES = FILTROS_NECESIDAD.map((f) => f.value);
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ n?: string }>;
+  searchParams: Promise<{ n?: string; q?: string }>;
 }) {
-  const { n } = await searchParams;
+  const { n, q } = await searchParams;
   const necesidad = n && NECESIDADES.includes(n as never) ? n : "todos";
+  const busqueda = q?.trim() ?? "";
+
+  const where: Prisma.ProductoWhereInput = {
+    activo: true,
+    ...(necesidad !== "todos" ? { necesidad: { has: necesidad } } : {}),
+    ...(busqueda
+      ? {
+          OR: [
+            { nombre: { contains: busqueda, mode: "insensitive" } },
+            { descripcionCorta: { contains: busqueda, mode: "insensitive" } },
+            { marca: { is: { nombre: { contains: busqueda, mode: "insensitive" } } } },
+          ],
+        }
+      : {}),
+  };
 
   const productos = await prisma.producto.findMany({
-    where: {
-      activo: true,
-      ...(necesidad !== "todos" ? { necesidad: { has: necesidad } } : {}),
-    },
+    where,
     orderBy: [{ destacado: "desc" }, { createdAt: "desc" }],
     include: {
       marca: true,
@@ -53,7 +66,7 @@ export default async function CatalogoPage({
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <header className="mb-6">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Nuestros productos
+          {busqueda ? `Resultados para “${busqueda}”` : "Nuestros productos"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {cards.length} producto{cards.length === 1 ? "" : "s"} · skincare coreano original
@@ -66,7 +79,9 @@ export default async function CatalogoPage({
 
       {cards.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
-          No hay productos para este filtro por ahora.
+          {busqueda
+            ? `No encontramos productos para “${busqueda}”.`
+            : "No hay productos para este filtro por ahora."}
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

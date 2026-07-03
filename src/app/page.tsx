@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Leaf, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { ArrowRight, Leaf, Quote, ShieldCheck, Sparkles, Star, Truck } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { ProductCard, type ProductCardData } from "@/components/tienda/product-card";
+import { BrandMarquee } from "@/components/tienda/brand-marquee";
+
+export const dynamic = "force-dynamic";
 
 const BENEFITS = [
   { icon: ShieldCheck, title: "Productos originales", text: "Marcas coreanas auténticas, seleccionadas con cuidado." },
@@ -7,7 +12,31 @@ const BENEFITS = [
   { icon: Truck, title: "Envíos a todo el Perú", text: "Delivery en Iquitos y envíos nacionales por courier." },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [destacados, marcas, testimonios] = await Promise.all([
+    prisma.producto.findMany({
+      where: { activo: true, destacado: true },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
+    }),
+    prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
+    prisma.testimonio.findMany({ where: { activo: true }, take: 6 }),
+  ]);
+
+  const cards: ProductCardData[] = destacados.map((p) => ({
+    slug: p.slug,
+    nombre: p.nombre,
+    marca: p.marca.nombre,
+    precio: Number(p.precio),
+    precioOferta: p.precioOferta != null ? Number(p.precioOferta) : null,
+    imagen: p.imagenes[0]?.url ?? "/productos/generico.svg",
+    alt: p.imagenes[0]?.alt ?? p.nombre,
+    nuevo: p.nuevo,
+    agotado: p.stock <= 0,
+    rating: 5,
+  }));
+
   return (
     <div>
       {/* Hero */}
@@ -55,7 +84,7 @@ export default function HomePage() {
       </section>
 
       {/* Benefits */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="grid gap-4 sm:grid-cols-3">
           {BENEFITS.map((b) => (
             <div
@@ -75,6 +104,71 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Marcas */}
+      <BrandMarquee marcas={marcas.map((m) => m.nombre)} />
+
+      {/* Destacados */}
+      {cards.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                Nuestros productos
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Los favoritos de la comunidad AGAPEK.
+              </p>
+            </div>
+            <Link
+              href="/catalogo"
+              className="hidden shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:inline-flex"
+            >
+              Ver catálogo completo
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {cards.map((p) => (
+              <ProductCard key={p.slug} p={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Testimonios */}
+      {testimonios.length > 0 && (
+        <section className="bg-card">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Lo que dice nuestra comunidad
+            </h2>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {testimonios.map((t) => (
+                <figure
+                  key={t.id}
+                  className="flex flex-col rounded-2xl border border-border bg-background p-6"
+                >
+                  <Quote className="size-6 text-primary/40" />
+                  <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-foreground/85">
+                    {t.texto}
+                  </blockquote>
+                  <figcaption className="mt-4 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground">
+                      {t.nombre}
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      {Array.from({ length: t.rating }).map((_, i) => (
+                        <Star key={i} className="size-3.5 fill-primary text-primary" />
+                      ))}
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

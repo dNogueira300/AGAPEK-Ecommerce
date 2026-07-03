@@ -118,6 +118,32 @@ async function main() {
     });
   }
 
+  // Testimonios (solo si aún no hay).
+  if ((await prisma.testimonio.count()) === 0) {
+    await prisma.testimonio.createMany({
+      data: [
+        {
+          nombre: "Lucía R.",
+          texto:
+            "Me ayudaron a armar mi rutina y mi piel está más luminosa que nunca. La atención por WhatsApp es súper amable.",
+          rating: 5,
+        },
+        {
+          nombre: "Marena T.",
+          texto:
+            "Productos originales y llegan rapidísimo a Iquitos. Ya es mi tienda de skincare de confianza.",
+          rating: 5,
+        },
+        {
+          nombre: "Diana P.",
+          texto:
+            "Amo que me asesoren según mi tipo de piel. Los precios son justos y todo llega bien empacado.",
+          rating: 5,
+        },
+      ],
+    });
+  }
+
   void Rol; // enum disponible para futuros seeds de usuarios
   console.log("✅ Seed completado.");
 }

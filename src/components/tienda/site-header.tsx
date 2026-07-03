@@ -49,17 +49,21 @@ export function SiteHeader() {
         </nav>
 
         {/* Search */}
-        <div className="ml-auto hidden max-w-xs flex-1 items-center md:flex">
+        <form
+          action="/catalogo"
+          className="ml-auto hidden max-w-xs flex-1 items-center md:flex"
+        >
           <div className="relative w-full">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="search"
+              name="q"
               placeholder="Busca productos, marcas o rutinas"
               aria-label="Buscar"
               className="h-10 w-full rounded-full border border-input bg-card pl-9 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
             />
           </div>
-        </div>
+        </form>
 
         {/* Actions */}
         <div className="flex items-center gap-1 md:ml-2">
