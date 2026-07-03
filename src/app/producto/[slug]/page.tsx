@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, Leaf, MessageCircle, Plus, Star } from "lucide-react";
+import { ChevronRight, Leaf, MessageCircle, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { urlWhatsApp } from "@/lib/whatsapp";
-import { cn } from "@/lib/utils";
+import { AddToCartFull } from "@/components/tienda/add-to-cart-button";
 
 export const dynamic = "force-dynamic";
 
@@ -168,29 +168,31 @@ export default async function ProductoPage({
           )}
 
           {/* CTA */}
-          <div className="mt-7 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              disabled={agotado}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md",
-                agotado && "cursor-not-allowed opacity-40 hover:translate-y-0 hover:shadow-sm",
-              )}
-            >
-              <Plus className="size-4.5" strokeWidth={2.5} />
-              Agregar al carrito
-            </button>
-
-            {agotado && waUrl && (
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
-              >
-                <MessageCircle className="size-4.5 text-primary" />
-                Consultar por WhatsApp
-              </a>
+          <div className="mt-7">
+            {agotado ? (
+              waUrl && (
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+                >
+                  <MessageCircle className="size-4.5 text-primary" />
+                  Consultar por WhatsApp
+                </a>
+              )
+            ) : (
+              <AddToCartFull
+                producto={{
+                  slug: producto.slug,
+                  nombre: producto.nombre,
+                  marca: producto.marca.nombre,
+                  precio: enOferta ? precioOferta! : precio,
+                  imagen,
+                  stock: producto.stock,
+                }}
+                agotado={agotado}
+              />
             )}
           </div>
 

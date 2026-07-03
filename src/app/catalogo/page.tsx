@@ -6,6 +6,7 @@ import {
   CatalogFilters,
   FILTROS_NECESIDAD,
 } from "@/components/tienda/catalog-filters";
+import { CatalogToolbar } from "@/components/tienda/catalog-toolbar";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -17,18 +18,44 @@ export const dynamic = "force-dynamic";
 
 const NECESIDADES = FILTROS_NECESIDAD.map((f) => f.value);
 
+const ORDEN: Record<string, Prisma.ProductoOrderByWithRelationInput[]> = {
+  relevancia: [{ destacado: "desc" }, { createdAt: "desc" }],
+  nuevo: [{ createdAt: "desc" }],
+  "precio-asc": [{ precio: "asc" }],
+  "precio-desc": [{ precio: "desc" }],
+};
+
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ n?: string; q?: string }>;
+  searchParams: Promise<{
+    n?: string;
+    q?: string;
+    cat?: string;
+    marca?: string;
+    sort?: string;
+    disp?: string;
+  }>;
 }) {
-  const { n, q } = await searchParams;
-  const necesidad = n && NECESIDADES.includes(n as never) ? n : "todos";
-  const busqueda = q?.trim() ?? "";
+  const sp = await searchParams;
+  const necesidad = sp.n && NECESIDADES.includes(sp.n as never) ? sp.n : "todos";
+  const busqueda = sp.q?.trim() ?? "";
+  const cat = sp.cat ?? "todas";
+  const marca = sp.marca ?? "todas";
+  const sort = sp.sort && sp.sort in ORDEN ? sp.sort : "relevancia";
+  const soloDisponibles = sp.disp === "1";
+
+  const [categorias, marcas] = await Promise.all([
+    prisma.categoria.findMany({ orderBy: { orden: "asc" } }),
+    prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
+  ]);
 
   const where: Prisma.ProductoWhereInput = {
     activo: true,
     ...(necesidad !== "todos" ? { necesidad: { has: necesidad } } : {}),
+    ...(cat !== "todas" ? { categoria: { is: { slug: cat } } } : {}),
+    ...(marca !== "todas" ? { marca: { is: { slug: marca } } } : {}),
+    ...(soloDisponibles ? { stock: { gt: 0 } } : {}),
     ...(busqueda
       ? {
           OR: [
@@ -42,7 +69,7 @@ export default async function CatalogoPage({
 
   const productos = await prisma.producto.findMany({
     where,
-    orderBy: [{ destacado: "desc" }, { createdAt: "desc" }],
+    orderBy: ORDEN[sort] ?? ORDEN.relevancia,
     include: {
       marca: true,
       imagenes: { orderBy: { orden: "asc" }, take: 1 },
@@ -59,6 +86,7 @@ export default async function CatalogoPage({
     alt: p.imagenes[0]?.alt ?? p.nombre,
     nuevo: p.nuevo,
     agotado: p.stock <= 0,
+    stock: p.stock,
     rating: 5,
   }));
 
@@ -73,8 +101,15 @@ export default async function CatalogoPage({
         </p>
       </header>
 
-      <div className="mb-8 border-b border-border pb-6">
+      <div className="mb-6">
         <CatalogFilters active={necesidad} />
+      </div>
+      <div className="mb-8 border-b border-border pb-6">
+        <CatalogToolbar
+          categorias={categorias.map((c) => ({ value: c.slug, label: c.nombre }))}
+          marcas={marcas.map((m) => ({ value: m.slug, label: m.nombre }))}
+          actual={{ cat, marca, sort, disp: soloDisponibles }}
+        />
       </div>
 
       {cards.length === 0 ? (

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Leaf, Quote, ShieldCheck, Sparkles, Star, Truck } from "lucide-react";
+import { ArrowRight, Leaf, Quote, ShieldCheck, Star, Truck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { ProductCard, type ProductCardData } from "@/components/tienda/product-card";
 import { BrandMarquee } from "@/components/tienda/brand-marquee";
+import { HeroCarousel } from "@/components/tienda/hero-carousel";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,8 @@ const BENEFITS = [
 ];
 
 export default async function HomePage() {
-  const [destacados, marcas, testimonios] = await Promise.all([
+  const [banners, destacados, marcas, testimonios] = await Promise.all([
+    prisma.banner.findMany({ where: { activo: true }, orderBy: { orden: "asc" } }),
     prisma.producto.findMany({
       where: { activo: true, destacado: true },
       orderBy: { createdAt: "desc" },
@@ -34,57 +36,36 @@ export default async function HomePage() {
     alt: p.imagenes[0]?.alt ?? p.nombre,
     nuevo: p.nuevo,
     agotado: p.stock <= 0,
+    stock: p.stock,
     rating: 5,
   }));
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-secondary via-background to-background" />
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24 lg:px-8">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
-              <Sparkles className="size-3.5 text-primary" />
-              K-Beauty · Skincare coreano
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+      {/* Hero carousel */}
+      {banners.length > 0 ? (
+        <HeroCarousel banners={banners} />
+      ) : (
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-secondary via-background to-background" />
+          <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-24">
+            <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
               Lo mejor de Corea para tu piel,{" "}
               <span className="text-primary">con gentileza y amor</span>
             </h1>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Descubre productos originales, arma tu rutina de skincare y recibe
-              asesoría personalizada por WhatsApp. Bloom &amp; Glow.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href="/catalogo"
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md"
-              >
-                Ver catálogo
-                <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                href="/rutinas"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
-              >
-                Arma tu rutina
-              </Link>
-            </div>
+            <Link
+              href="/catalogo"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm"
+            >
+              Ver catálogo
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
-
-          <div className="relative">
-            <div className="aspect-[4/3] w-full rounded-[2rem] border border-border bg-gradient-to-br from-card to-secondary shadow-sm" />
-            <div className="absolute -bottom-4 -left-4 hidden rounded-2xl border border-border bg-card px-5 py-4 shadow-sm sm:block">
-              <p className="font-display text-2xl font-semibold text-primary">+80</p>
-              <p className="text-xs text-muted-foreground">productos coreanos</p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Benefits */}
-      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-4 sm:grid-cols-3">
           {BENEFITS.map((b) => (
             <div

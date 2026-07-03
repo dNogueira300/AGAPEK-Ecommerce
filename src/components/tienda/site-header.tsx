@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Heart, Menu, Search, ShoppingBag, Sparkles, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { contarItems, useCart, useCartHydrated } from "@/stores/cart";
 
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
@@ -16,6 +17,9 @@ const NAV_LINKS = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const items = useCart((s) => s.items);
+  const hydrated = useCartHydrated();
+  const cartCount = hydrated ? contarItems(items) : 0;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -70,7 +74,7 @@ export function SiteHeader() {
           <IconButton label="Favoritos" href="/favoritos">
             <Heart className="size-5" />
           </IconButton>
-          <IconButton label="Carrito" href="/carrito" badge={0}>
+          <IconButton label="Carrito" href="/carrito" badge={cartCount}>
             <ShoppingBag className="size-5" />
           </IconButton>
           <Link

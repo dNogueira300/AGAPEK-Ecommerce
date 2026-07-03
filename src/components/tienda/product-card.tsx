@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
+import { AddToCartIcon } from "@/components/tienda/add-to-cart-button";
 
 export interface ProductCardData {
   slug: string;
@@ -13,6 +13,7 @@ export interface ProductCardData {
   alt: string;
   nuevo: boolean;
   agotado: boolean;
+  stock: number;
   rating?: number;
 }
 
@@ -87,17 +88,17 @@ export function ProductCard({ p }: { p: ProductCardData }) {
               {soles(enOferta ? p.precioOferta! : p.precio)}
             </span>
           </div>
-          <button
-            type="button"
-            aria-label={p.agotado ? "Consultar por WhatsApp" : `Agregar ${p.nombre} al carrito`}
-            disabled={p.agotado}
-            className={cn(
-              "inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md",
-              p.agotado && "cursor-not-allowed opacity-40 hover:translate-y-0 hover:shadow-sm",
-            )}
-          >
-            <Plus className="size-4.5" strokeWidth={2.5} />
-          </button>
+          <AddToCartIcon
+            producto={{
+              slug: p.slug,
+              nombre: p.nombre,
+              marca: p.marca,
+              precio: enOferta ? p.precioOferta! : p.precio,
+              imagen: p.imagen,
+              stock: p.stock,
+            }}
+            agotado={p.agotado}
+          />
         </div>
       </div>
     </div>

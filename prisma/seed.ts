@@ -118,6 +118,17 @@ async function main() {
     });
   }
 
+  // Banners del hero (solo si aún no hay).
+  if ((await prisma.banner.count()) === 0) {
+    await prisma.banner.createMany({
+      data: [
+        { titulo: "Tu rutina coreana empieza aquí", imagenUrl: "/banners/banner-1.svg", enlace: "/catalogo", orden: 0 },
+        { titulo: "Bloom & Glow", imagenUrl: "/banners/banner-2.svg", enlace: "/marcas", orden: 1 },
+        { titulo: "Cuida tu piel con gentileza y amor", imagenUrl: "/banners/banner-3.svg", enlace: "/rutinas", orden: 2 },
+      ],
+    });
+  }
+
   // Testimonios (solo si aún no hay).
   if ((await prisma.testimonio.count()) === 0) {
     await prisma.testimonio.createMany({
