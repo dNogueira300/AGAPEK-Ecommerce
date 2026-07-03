@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { ProductCard, type ProductCardData } from "@/components/tienda/product-card";
+import {
+  CatalogFilters,
+  FILTROS_NECESIDAD,
+} from "@/components/tienda/catalog-filters";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -10,9 +14,21 @@ export const metadata: Metadata = {
 // Datos frescos desde la BD en cada request (aún sin caché durante desarrollo).
 export const dynamic = "force-dynamic";
 
-export default async function CatalogoPage() {
+const NECESIDADES = FILTROS_NECESIDAD.map((f) => f.value);
+
+export default async function CatalogoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ n?: string }>;
+}) {
+  const { n } = await searchParams;
+  const necesidad = n && NECESIDADES.includes(n as never) ? n : "todos";
+
   const productos = await prisma.producto.findMany({
-    where: { activo: true },
+    where: {
+      activo: true,
+      ...(necesidad !== "todos" ? { necesidad: { has: necesidad } } : {}),
+    },
     orderBy: [{ destacado: "desc" }, { createdAt: "desc" }],
     include: {
       marca: true,
@@ -35,7 +51,7 @@ export default async function CatalogoPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="mb-8">
+      <header className="mb-6">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Nuestros productos
         </h1>
@@ -44,9 +60,13 @@ export default async function CatalogoPage() {
         </p>
       </header>
 
+      <div className="mb-8 border-b border-border pb-6">
+        <CatalogFilters active={necesidad} />
+      </div>
+
       {cards.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
-          Aún no hay productos publicados.
+          No hay productos para este filtro por ahora.
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
