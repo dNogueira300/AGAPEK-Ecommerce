@@ -19,7 +19,9 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    // Migraciones vía Session pooler (puerto 5432). El transaction pooler (6543)
+    // no sirve para migrar. El runtime sí usa DATABASE_URL (ver src/lib/prisma.ts).
+    url: env("DIRECT_URL"),
     // Si Prisma Migrate no puede crear la shadow database automáticamente,
     // descomenta la línea siguiente y define SHADOW_DATABASE_URL en .env.local:
     // shadowDatabaseUrl: env("SHADOW_DATABASE_URL"),

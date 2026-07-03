@@ -7,7 +7,8 @@ import { z } from "zod";
  */
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.string().url(), // runtime (transaction pooler, 6543)
+    DIRECT_URL: z.string().url(), // migraciones (session pooler, 5432)
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },
@@ -18,6 +19,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
+    DIRECT_URL: process.env.DIRECT_URL,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,

@@ -1,6 +1,16 @@
+import { config } from "dotenv";
 import { PrismaClient, Rol } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+// Cargar variables (el script se ejecuta con tsx, fuera de Next.js).
+config({ path: ".env.local" });
+config({ path: ".env" });
+
+// Session pooler (5432) para el script de seed.
+const adapter = new PrismaPg({
+  connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
+});
+const prisma = new PrismaClient({ adapter });
 
 // Imagen genérica reutilizable (se reemplaza luego desde el panel).
 const IMG = "/productos/generico.svg";
