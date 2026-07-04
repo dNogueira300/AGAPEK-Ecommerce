@@ -43,10 +43,14 @@ export async function signUpAction(
   const destino = safeRedirect(formData.get("redirect"));
 
   const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { nombre } },
+    options: {
+      data: { nombre },
+      emailRedirectTo: `${siteUrl}/auth/confirm`,
+    },
   });
   if (error) return { error: error.message };
 

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatFecha } from "@/lib/date";
+import { SalesChart } from "@/components/admin/sales-chart";
 
 export const metadata: Metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
@@ -50,6 +51,26 @@ export default async function AdminDashboard() {
       }),
     ]);
 
+  // Serie de ventas de los últimos 7 días (hora Lima).
+  const dias = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(Date.now() - (6 - i) * 86400000);
+    return { key: formatFecha(d, "yyyy-MM-dd"), label: formatFecha(d, "dd/MM") };
+  });
+  const ventas7 = await prisma.pedido.findMany({
+    where: {
+      createdAt: { gte: new Date(Date.now() - 7 * 86400000) },
+      estado: { notIn: ["CANCELADO"] },
+    },
+    select: { total: true, createdAt: true },
+  });
+  const sumByKey = new Map<string, number>();
+  for (const v of ventas7) {
+    const k = formatFecha(v.createdAt, "yyyy-MM-dd");
+    sumByKey.set(k, (sumByKey.get(k) ?? 0) + Number(v.total));
+  }
+  const chartLabels = dias.map((d) => d.label);
+  const chartData = dias.map((d) => sumByKey.get(d.key) ?? 0);
+
   const stats = [
     { label: "Productos activos", value: productos, icon: Package, href: "/admin/productos" },
     { label: "Pedidos por atender", value: pendientes, icon: Clock, href: "/admin/pedidos" },
@@ -87,6 +108,14 @@ export default async function AdminDashboard() {
           );
         })}
       </div>
+
+      {/* Gráfico de ventas */}
+      <section className="mt-6 rounded-2xl border border-border bg-card p-5">
+        <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+          Ventas de los últimos 7 días
+        </h2>
+        <SalesChart labels={chartLabels} data={chartData} />
+      </section>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
         {/* Pedidos recientes */}
