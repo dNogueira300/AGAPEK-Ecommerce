@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Leaf, Quote, ShieldCheck, Star, Truck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { ProductCard, type ProductCardData } from "@/components/tienda/product-card";
+import { ProductCard } from "@/components/tienda/product-card";
+import { toProductCard } from "@/lib/product-card";
 import { BrandMarquee } from "@/components/tienda/brand-marquee";
 import { HeroCarousel } from "@/components/tienda/hero-carousel";
 
@@ -14,7 +15,7 @@ const BENEFITS = [
 ];
 
 export default async function HomePage() {
-  const [banners, destacados, marcas, testimonios] = await Promise.all([
+  const [banners, destacados, marcas, testimonios, cfg] = await Promise.all([
     prisma.banner.findMany({ where: { activo: true }, orderBy: { orden: "asc" } }),
     prisma.producto.findMany({
       where: { activo: true, destacado: true },
@@ -24,21 +25,10 @@ export default async function HomePage() {
     }),
     prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
     prisma.testimonio.findMany({ where: { activo: true }, take: 6 }),
+    prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
   ]);
-
-  const cards: ProductCardData[] = destacados.map((p) => ({
-    slug: p.slug,
-    nombre: p.nombre,
-    marca: p.marca.nombre,
-    precio: Number(p.precio),
-    precioOferta: p.precioOferta != null ? Number(p.precioOferta) : null,
-    imagen: p.imagenes[0]?.url ?? "/productos/generico.svg",
-    alt: p.imagenes[0]?.alt ?? p.nombre,
-    nuevo: p.nuevo,
-    agotado: p.stock <= 0,
-    stock: p.stock,
-    rating: 5,
-  }));
+  const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
+  const cards = destacados.map((p) => toProductCard(p, whatsapp));
 
   return (
     <div>

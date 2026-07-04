@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { ROLES_ADMIN } from "@/lib/auth";
 
 export interface AuthState {
   error?: string;
@@ -82,13 +83,73 @@ export async function signInAction(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
-  const destino = safeRedirect(formData.get("redirect"));
+  let destino = safeRedirect(formData.get("redirect"));
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "Correo o contraseña incorrectos." };
 
+  // Los administradores van directo al panel (si no había un redirect explícito).
+  if (destino === "/" && data.user) {
+    const perfil = await prisma.perfil.findUnique({
+      where: { id: data.user.id },
+      select: { rol: true },
+    });
+    if (perfil && ROLES_ADMIN.includes(perfil.rol)) destino = "/admin";
+  }
+
   redirect(destino);
+}
+
+const resetSchema = z.object({ email: z.string().email("Correo inválido.") });
+
+export async function solicitarResetAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const parsed = resetSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+
+  const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  // Enviamos el correo; el enlace lleva a /auth/callback que crea la sesión de
+  // recuperación y redirige a /restablecer.
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${siteUrl}/auth/callback?next=/restablecer`,
+  });
+  // No revelamos si el correo existe.
+  return {
+    message:
+      "Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña.",
+  };
+}
+
+const passSchema = z
+  .object({
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+    confirmar: z.string(),
+  })
+  .refine((d) => d.password === d.confirmar, {
+    message: "Las contraseñas no coinciden.",
+    path: ["confirmar"],
+  });
+
+export async function actualizarPasswordAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const parsed = passSchema.safeParse({
+    password: formData.get("password"),
+    confirmar: formData.get("confirmar"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) {
+    return { error: "El enlace expiró o no es válido. Solicita uno nuevo." };
+  }
+  redirect("/login?reset=ok");
 }
 
 export async function signOutAction(): Promise<void> {

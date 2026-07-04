@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { ProductCard, type ProductCardData } from "@/components/tienda/product-card";
-import {
-  CatalogFilters,
-  FILTROS_NECESIDAD,
-} from "@/components/tienda/catalog-filters";
-import { CatalogToolbar } from "@/components/tienda/catalog-toolbar";
+import { ProductCard } from "@/components/tienda/product-card";
+import { toProductCard } from "@/lib/product-card";
+import { CatalogSidebar } from "@/components/tienda/catalog-sidebar";
+import { CatalogSort } from "@/components/tienda/catalog-sort";
 
 export const metadata: Metadata = {
-  title: "Catálogo",
+  title: "Tienda",
   description: "Explora productos coreanos de skincare originales en AGAPEK.",
 };
 
-// Datos frescos desde la BD en cada request (aún sin caché durante desarrollo).
 export const dynamic = "force-dynamic";
-
-const NECESIDADES = FILTROS_NECESIDAD.map((f) => f.value);
 
 const ORDEN: Record<string, Prisma.ProductoOrderByWithRelationInput[]> = {
   relevancia: [{ destacado: "desc" }, { createdAt: "desc" }],
@@ -25,37 +20,51 @@ const ORDEN: Record<string, Prisma.ProductoOrderByWithRelationInput[]> = {
   "precio-desc": [{ precio: "desc" }],
 };
 
+const lista = (v?: string) => (v ? v.split(",").filter(Boolean) : []);
+
 export default async function CatalogoPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    n?: string;
     q?: string;
+    sort?: string;
     cat?: string;
     marca?: string;
-    sort?: string;
-    disp?: string;
+    piel?: string;
+    nec?: string;
+    min?: string;
+    max?: string;
   }>;
 }) {
   const sp = await searchParams;
-  const necesidad = sp.n && NECESIDADES.includes(sp.n as never) ? sp.n : "todos";
   const busqueda = sp.q?.trim() ?? "";
-  const cat = sp.cat ?? "todas";
-  const marca = sp.marca ?? "todas";
   const sort = sp.sort && sp.sort in ORDEN ? sp.sort : "relevancia";
-  const soloDisponibles = sp.disp === "1";
+  const cats = lista(sp.cat);
+  const marcasF = lista(sp.marca);
+  const piel = lista(sp.piel);
+  const nec = lista(sp.nec);
+  const min = sp.min ? Number(sp.min) : undefined;
+  const max = sp.max ? Number(sp.max) : undefined;
 
-  const [categorias, marcas] = await Promise.all([
+  const [categorias, marcas, cfg] = await Promise.all([
     prisma.categoria.findMany({ orderBy: { orden: "asc" } }),
     prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
+    prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
   ]);
+  const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
+
+  const precioFilter: Prisma.DecimalFilter | undefined =
+    min !== undefined || max !== undefined
+      ? { ...(min !== undefined ? { gte: min } : {}), ...(max !== undefined ? { lte: max } : {}) }
+      : undefined;
 
   const where: Prisma.ProductoWhereInput = {
     activo: true,
-    ...(necesidad !== "todos" ? { necesidad: { has: necesidad } } : {}),
-    ...(cat !== "todas" ? { categoria: { is: { slug: cat } } } : {}),
-    ...(marca !== "todas" ? { marca: { is: { slug: marca } } } : {}),
-    ...(soloDisponibles ? { stock: { gt: 0 } } : {}),
+    ...(cats.length ? { categoria: { is: { slug: { in: cats } } } } : {}),
+    ...(marcasF.length ? { marca: { is: { slug: { in: marcasF } } } } : {}),
+    ...(piel.length ? { tipoPiel: { hasSome: piel } } : {}),
+    ...(nec.length ? { necesidad: { hasSome: nec } } : {}),
+    ...(precioFilter ? { precio: precioFilter } : {}),
     ...(busqueda
       ? {
           OR: [
@@ -70,61 +79,47 @@ export default async function CatalogoPage({
   const productos = await prisma.producto.findMany({
     where,
     orderBy: ORDEN[sort] ?? ORDEN.relevancia,
-    include: {
-      marca: true,
-      imagenes: { orderBy: { orden: "asc" }, take: 1 },
-    },
+    include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
   });
-
-  const cards: ProductCardData[] = productos.map((p) => ({
-    slug: p.slug,
-    nombre: p.nombre,
-    marca: p.marca.nombre,
-    precio: Number(p.precio),
-    precioOferta: p.precioOferta != null ? Number(p.precioOferta) : null,
-    imagen: p.imagenes[0]?.url ?? "/productos/generico.svg",
-    alt: p.imagenes[0]?.alt ?? p.nombre,
-    nuevo: p.nuevo,
-    agotado: p.stock <= 0,
-    stock: p.stock,
-    rating: 5,
-  }));
+  const cards = productos.map((p) => toProductCard(p, whatsapp));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="mb-6">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          {busqueda ? `Resultados para “${busqueda}”` : "Nuestros productos"}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {cards.length} producto{cards.length === 1 ? "" : "s"} · skincare coreano original
-        </p>
-      </header>
-
-      <div className="mb-6">
-        <CatalogFilters active={necesidad} />
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      {/* Encabezado */}
+      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">Inicio / Tienda</p>
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {busqueda ? `Resultados para “${busqueda}”` : "Tienda"}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {cards.length} producto{cards.length === 1 ? "" : "s"}
+          </p>
+        </div>
+        <CatalogSort value={sort} />
       </div>
-      <div className="mb-8 border-b border-border pb-6">
-        <CatalogToolbar
+
+      {/* Contenido */}
+      <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:gap-8">
+        <CatalogSidebar
           categorias={categorias.map((c) => ({ value: c.slug, label: c.nombre }))}
           marcas={marcas.map((m) => ({ value: m.slug, label: m.nombre }))}
-          actual={{ cat, marca, sort, disp: soloDisponibles }}
         />
-      </div>
 
-      {cards.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
-          {busqueda
-            ? `No encontramos productos para “${busqueda}”.`
-            : "No hay productos para este filtro por ahora."}
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {cards.map((p) => (
-            <ProductCard key={p.slug} p={p} />
-          ))}
+        <div className="flex-1">
+          {cards.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
+              No encontramos productos con esos filtros.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              {cards.map((p) => (
+                <ProductCard key={p.slug} p={p} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

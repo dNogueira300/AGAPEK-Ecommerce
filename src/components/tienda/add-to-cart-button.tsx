@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Minus, Plus } from "lucide-react";
+import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useCart, type CartItem } from "@/stores/cart";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,45 @@ export function AddToCartIcon({
       )}
     >
       {ok ? <Check className="size-4.5" strokeWidth={2.5} /> : <Plus className="size-4.5" strokeWidth={2.5} />}
+    </button>
+  );
+}
+
+export function AddToCartWide({
+  producto,
+  agotado,
+}: {
+  producto: Producto;
+  agotado: boolean;
+}) {
+  const add = useCart((s) => s.add);
+  const [ok, setOk] = useState(false);
+
+  const handle = () => {
+    add(producto, 1);
+    setOk(true);
+    setTimeout(() => setOk(false), 1200);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handle}
+      disabled={agotado}
+      className={cn(
+        "inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-foreground text-sm font-semibold text-background transition-colors hover:bg-foreground/90",
+        agotado && "cursor-not-allowed opacity-40",
+      )}
+    >
+      {ok ? (
+        <>
+          <Check className="size-4" strokeWidth={2.5} /> Agregado
+        </>
+      ) : (
+        <>
+          <ShoppingCart className="size-4" /> Agregar
+        </>
+      )}
     </button>
   );
 }

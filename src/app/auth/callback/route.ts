@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { ROLES_ADMIN } from "@/lib/auth";
 
-// Intercambia el código de OAuth (Google) por una sesión.
+// Intercambia el código (OAuth Google o recuperación) por una sesión.
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -9,9 +11,16 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const destino = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+      let destino = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+      if (destino === "/" && data.user) {
+        const perfil = await prisma.perfil.findUnique({
+          where: { id: data.user.id },
+          select: { rol: true },
+        });
+        if (perfil && ROLES_ADMIN.includes(perfil.rol)) destino = "/admin";
+      }
       return NextResponse.redirect(`${origin}${destino}`);
     }
   }

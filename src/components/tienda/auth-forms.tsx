@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Loader2 } from "lucide-react";
 import {
+  actualizarPasswordAction,
   signInAction,
   signUpAction,
+  solicitarResetAction,
   type AuthState,
 } from "@/lib/auth-actions";
 import { GoogleButton } from "@/components/tienda/google-button";
@@ -75,6 +77,11 @@ export function LoginForm({ redirect = "/" }: { redirect?: string }) {
           </label>
           <input id="password" name="password" type="password" required autoComplete="current-password" className={inputClass} placeholder="••••••••" />
         </div>
+        <div className="flex justify-end">
+          <Link href="/recuperar" className="text-sm font-medium text-primary hover:underline">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
         <Feedback state={state} />
         <SubmitButton pending={pending}>Iniciar sesión</SubmitButton>
       </form>
@@ -85,6 +92,57 @@ export function LoginForm({ redirect = "/" }: { redirect?: string }) {
         </Link>
       </p>
     </div>
+  );
+}
+
+export function ResetRequestForm() {
+  const [state, formAction, pending] = useActionState<AuthState, FormData>(
+    solicitarResetAction,
+    {},
+  );
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <div className="space-y-1.5">
+        <label className={labelClass} htmlFor="email">
+          Correo
+        </label>
+        <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} placeholder="tucorreo@ejemplo.com" />
+      </div>
+      <Feedback state={state} />
+      <SubmitButton pending={pending}>Enviar enlace</SubmitButton>
+      <p className="text-center text-sm text-muted-foreground">
+        <Link href="/login" className="font-semibold text-primary hover:underline">
+          Volver a iniciar sesión
+        </Link>
+      </p>
+    </form>
+  );
+}
+
+export function NewPasswordForm() {
+  const [state, formAction, pending] = useActionState<AuthState, FormData>(
+    actualizarPasswordAction,
+    {},
+  );
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <div className="space-y-1.5">
+        <label className={labelClass} htmlFor="password">
+          Nueva contraseña
+        </label>
+        <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" className={inputClass} placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div className="space-y-1.5">
+        <label className={labelClass} htmlFor="confirmar">
+          Confirmar contraseña
+        </label>
+        <input id="confirmar" name="confirmar" type="password" required minLength={6} autoComplete="new-password" className={inputClass} placeholder="Repite la contraseña" />
+      </div>
+      <Feedback state={state} />
+      <SubmitButton pending={pending}>Guardar contraseña</SubmitButton>
+    </form>
   );
 }
 
