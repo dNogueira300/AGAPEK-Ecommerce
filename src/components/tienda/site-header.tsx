@@ -111,18 +111,43 @@ export function SiteHeader({ sesion }: { sesion: SesionHeader | null }) {
       {/* Mobile menu */}
       {open && (
         <div className="border-t border-border/60 bg-background lg:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
-            {NAV_LINKS.map((link) => (
+          <div className="mx-auto max-w-7xl space-y-3 px-4 py-3 sm:px-6">
+            {/* Buscador (solo cuando el de arriba está oculto) */}
+            <form action="/catalogo" className="md:hidden">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="search"
+                  name="q"
+                  placeholder="Busca productos, marcas…"
+                  aria-label="Buscar"
+                  className="h-10 w-full rounded-full border border-input bg-card pl-9 pr-4 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                />
+              </div>
+            </form>
+
+            <nav className="flex flex-col gap-1">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-secondary"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {/* Perfil/login (solo cuando el botón de arriba está oculto) */}
               <Link
-                key={link.href}
-                href={link.href}
+                href={sesion ? "/perfil" : "/login"}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-secondary"
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-secondary sm:hidden"
               >
-                {link.label}
+                <User className="size-4" />
+                {sesion ? (primerNombre ?? "Mi perfil") : "Ingresar"}
               </Link>
-            ))}
-          </nav>
+            </nav>
+          </div>
         </div>
       )}
     </header>
