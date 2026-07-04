@@ -1,7 +1,6 @@
 "use server";
 
 import { z } from "zod";
-import sharp from "sharp";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -26,6 +25,7 @@ function slugify(s: string): string {
 }
 
 async function subirImagen(file: File, slug: string): Promise<string> {
+  const { default: sharp } = await import("sharp");
   const buf = Buffer.from(await file.arrayBuffer());
   const webp = await sharp(buf)
     .resize(800, 800, { fit: "cover", position: "attention" })
