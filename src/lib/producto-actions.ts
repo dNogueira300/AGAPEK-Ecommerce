@@ -5,24 +5,10 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getPerfil, ROLES_ADMIN } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BUCKET, CARPETA } from "@/lib/supabase/storage";
-
-async function requireAdmin() {
-  const d = await getPerfil();
-  if (!d || !ROLES_ADMIN.includes(d.perfil.rol)) throw new Error("No autorizado");
-  return d;
-}
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+import { slugify } from "@/lib/slug";
 
 async function subirImagen(file: File, slug: string): Promise<string> {
   const { default: sharp } = await import("sharp");

@@ -20,6 +20,13 @@ export interface PerfilConEmail {
 /** Roles con acceso al panel administrador. */
 export const ROLES_ADMIN: Rol[] = ["ADMIN", "TECNICO", "VENDEDOR"];
 
+/** Lanza si el usuario no puede administrar. Devuelve su perfil si sí. */
+export async function requireAdmin(): Promise<PerfilConEmail> {
+  const d = await getPerfil();
+  if (!d || !ROLES_ADMIN.includes(d.perfil.rol)) throw new Error("No autorizado");
+  return d;
+}
+
 /** Devuelve el Perfil del usuario, creándolo si aún no existe. */
 export async function getPerfil(): Promise<PerfilConEmail | null> {
   const user = await getUser();

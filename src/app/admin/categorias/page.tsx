@@ -1,0 +1,72 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { eliminarCategoria } from "@/lib/categoria-actions";
+
+export const metadata: Metadata = { title: "Categorías" };
+export const dynamic = "force-dynamic";
+
+export default async function AdminCategorias() {
+  const categorias = await prisma.categoria.findMany({
+    orderBy: { orden: "asc" },
+    include: { _count: { select: { productos: true } } },
+  });
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Categorías</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{categorias.length} categorías.</p>
+        </div>
+        <Link href="/admin/categorias/nuevo" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5">
+          <Plus className="size-4" /> Nueva categoría
+        </Link>
+      </div>
+
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-card">
+        <table className="w-full min-w-[520px] text-sm">
+          <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 font-medium">Nombre</th>
+              <th className="px-4 py-3 font-medium">Orden</th>
+              <th className="px-4 py-3 font-medium">Productos</th>
+              <th className="px-4 py-3 text-right font-medium">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {categorias.map((c) => (
+              <tr key={c.id} className="hover:bg-secondary/40">
+                <td className="px-4 py-3">
+                  <p className="font-medium text-foreground">{c.nombre}</p>
+                  <p className="text-xs text-muted-foreground">/{c.slug}</p>
+                </td>
+                <td className="px-4 py-3 text-foreground/80">{c.orden}</td>
+                <td className="px-4 py-3 text-foreground/80">{c._count.productos}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-1">
+                    <Link href={`/admin/categorias/${c.id}/editar`} aria-label="Editar" className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-secondary hover:text-foreground">
+                      <Pencil className="size-4" />
+                    </Link>
+                    <form action={eliminarCategoria.bind(null, c.id)}>
+                      <button
+                        type="submit"
+                        disabled={c._count.productos > 0}
+                        aria-label="Eliminar"
+                        title={c._count.productos > 0 ? "Tiene productos asociados" : "Eliminar"}
+                        className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-30"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
