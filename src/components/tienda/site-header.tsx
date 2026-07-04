@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Heart, Menu, Search, ShoppingBag, Sparkles, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,11 +21,14 @@ interface SesionHeader {
 }
 
 export function SiteHeader({ sesion }: { sesion: SesionHeader | null }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const items = useCart((s) => s.items);
   const hydrated = useCartHydrated();
   const cartCount = hydrated ? contarItems(items) : 0;
   const primerNombre = sesion?.nombre.split(" ")[0];
+
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">

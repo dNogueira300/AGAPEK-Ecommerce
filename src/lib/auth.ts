@@ -17,6 +17,9 @@ export interface PerfilConEmail {
   email: string | null;
 }
 
+/** Roles con acceso al panel administrador. */
+export const ROLES_ADMIN: Rol[] = ["ADMIN", "TECNICO", "VENDEDOR"];
+
 /** Devuelve el Perfil del usuario, creándolo si aún no existe. */
 export async function getPerfil(): Promise<PerfilConEmail | null> {
   const user = await getUser();
