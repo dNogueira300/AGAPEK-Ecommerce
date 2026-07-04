@@ -15,20 +15,58 @@ const BENEFITS = [
 ];
 
 export default async function HomePage() {
-  const [banners, destacados, marcas, testimonios, cfg] = await Promise.all([
-    prisma.banner.findMany({ where: { activo: true }, orderBy: { orden: "asc" } }),
-    prisma.producto.findMany({
-      where: { activo: true, destacado: true },
-      orderBy: { createdAt: "desc" },
-      take: 8,
-      include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
-    }),
-    prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
-    prisma.testimonio.findMany({ where: { activo: true }, take: 6 }),
-    prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
-  ]);
+  const incluir = {
+    marca: true,
+    imagenes: { orderBy: { orden: "asc" as const }, take: 1 },
+  };
+  const [banners, destacados, nuevos, marcas, testimonios, cfg, bestRows] =
+    await Promise.all([
+      prisma.banner.findMany({ where: { activo: true }, orderBy: { orden: "asc" } }),
+      prisma.producto.findMany({
+        where: { activo: true, destacado: true },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        include: incluir,
+      }),
+      prisma.producto.findMany({
+        where: { activo: true, nuevo: true },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        include: incluir,
+      }),
+      prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
+      prisma.testimonio.findMany({ where: { activo: true }, take: 6 }),
+      prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
+      prisma.pedidoItem.groupBy({
+        by: ["productoId"],
+        _sum: { cantidad: true },
+        orderBy: { _sum: { cantidad: "desc" } },
+        take: 8,
+      }),
+    ]);
   const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
-  const cards = destacados.map((p) => toProductCard(p, whatsapp));
+
+  // Más vendidos (por ventas reales); si faltan, se completa con destacados.
+  const bestIds = bestRows.map((r) => r.productoId);
+  const found = bestIds.length
+    ? await prisma.producto.findMany({
+        where: { id: { in: bestIds }, activo: true },
+        include: incluir,
+      })
+    : [];
+  const byId = new Map(found.map((p) => [p.id, p]));
+  let masVendidosProd = bestIds
+    .map((id) => byId.get(id))
+    .filter((p): p is (typeof found)[number] => Boolean(p));
+  if (masVendidosProd.length < 4) {
+    const extra = destacados.filter(
+      (d) => !masVendidosProd.some((m) => m.id === d.id),
+    );
+    masVendidosProd = [...masVendidosProd, ...extra].slice(0, 8);
+  }
+
+  const masVendidos = masVendidosProd.map((p) => toProductCard(p, whatsapp));
+  const nuevosCards = nuevos.map((p) => toProductCard(p, whatsapp));
 
   return (
     <div>
@@ -79,33 +117,80 @@ export default async function HomePage() {
       {/* Marcas */}
       <BrandMarquee marcas={marcas.map((m) => m.nombre)} />
 
-      {/* Destacados */}
-      {cards.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                Nuestros productos
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Los favoritos de la comunidad AGAPEK.
-              </p>
-            </div>
-            <Link
-              href="/catalogo"
-              className="hidden shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:inline-flex"
-            >
-              Ver catálogo completo
-              <ArrowRight className="size-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {cards.map((p) => (
+      {/* Los más vendidos */}
+      {masVendidos.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Los Más Vendidos
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Los favoritos de nuestras clientas en Iquitos.
+          </p>
+          <div className="mt-10 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 lg:grid-cols-4">
+            {masVendidos.slice(0, 4).map((p) => (
               <ProductCard key={p.slug} p={p} />
             ))}
           </div>
         </section>
       )}
+
+      {/* Lo nuevo */}
+      {nuevosCards.length > 0 && (
+        <section className="bg-secondary/40">
+          <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Lo Nuevo en AGAPEK
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Descubre los últimos productos coreanos que acaban de llegar.
+            </p>
+            <div className="mt-10 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 lg:grid-cols-4">
+              {nuevosCards.slice(0, 4).map((p) => (
+                <ProductCard key={p.slug} p={p} />
+              ))}
+            </div>
+            <Link
+              href="/catalogo"
+              className="mt-10 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+            >
+              Ver catálogo completo
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* CTA */}
+      <section className="bg-foreground">
+        <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:py-20">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-background sm:text-4xl">
+            Tu rutina ideal empieza con una buena guía
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-background/70 sm:text-base">
+            Escríbenos y recibe asesoría personalizada por WhatsApp para armar tu
+            rutina de skincare coreano.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/catalogo"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
+            >
+              Explorar catálogo
+              <ArrowRight className="size-4" />
+            </Link>
+            {whatsapp && (
+              <a
+                href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-background/30 px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+              >
+                Consultar por WhatsApp
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* Testimonios */}
       {testimonios.length > 0 && (

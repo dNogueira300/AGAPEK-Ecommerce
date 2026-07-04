@@ -199,6 +199,8 @@ model Post {
   id         String   @id @default(cuid())
   titulo     String
   slug       String   @unique
+  categoria  String?
+  resumen    String?
   contenido  String
   portadaUrl String?
   publicado  Boolean  @default(false)

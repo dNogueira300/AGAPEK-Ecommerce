@@ -188,6 +188,70 @@ async function main() {
     });
   }
 
+  // Posts del blog (idempotente por slug).
+  const POSTS = [
+    {
+      slug: "como-iniciar-tu-rutina-de-skincare-coreano",
+      titulo: "Cómo iniciar tu rutina de skincare coreano",
+      categoria: "Rutinas",
+      resumen:
+        "Descubre los 10 pasos esenciales del skincare coreano y cómo adaptarlos a tu vida diaria para una piel radiante.",
+      portadaUrl: "/banners/foto-1.webp",
+    },
+    {
+      slug: "diferencia-entre-tonico-esencia-y-serum",
+      titulo: "Diferencia entre tónico, esencia y sérum",
+      categoria: "Ingredientes",
+      resumen:
+        "Aprende a distinguir cada producto y cuál es el orden correcto de aplicación en tu rutina de cuidado facial.",
+      portadaUrl: "/productos/p2.webp",
+    },
+    {
+      slug: "que-protector-solar-usar-en-clima-amazonico",
+      titulo: "Qué protector solar usar en clima amazónico",
+      categoria: "Tips",
+      resumen:
+        "Guía práctica para elegir el mejor SPF para el clima tropical de Iquitos y mantener tu piel protegida.",
+      portadaUrl: "/banners/foto-3.webp",
+    },
+    {
+      slug: "ingredientes-estrella-del-k-beauty",
+      titulo: "Ingredientes estrella del K-Beauty",
+      categoria: "Ingredientes",
+      resumen:
+        "Centella asiática, niacinamida, ácido hialurónico y más: qué hacen y para qué tipo de piel son ideales.",
+      portadaUrl: "/productos/p5.webp",
+    },
+    {
+      slug: "maquillaje-coreano-look-natural",
+      titulo: "Maquillaje coreano: el look natural que amamos",
+      categoria: "Maquillaje",
+      resumen:
+        "Consigue el famoso acabado 'glass skin' y un maquillaje fresco paso a paso con productos coreanos.",
+      portadaUrl: "/productos/p6.webp",
+    },
+    {
+      slug: "rutina-de-noche-para-piel-luminosa",
+      titulo: "Rutina de noche para una piel luminosa",
+      categoria: "Rutinas",
+      resumen:
+        "La noche es cuando tu piel se repara. Te contamos los pasos clave para despertar con una piel más suave.",
+      portadaUrl: "/banners/foto-2.webp",
+    },
+  ];
+  for (const post of POSTS) {
+    await prisma.post.upsert({
+      where: { slug: post.slug },
+      update: { ...post, publicado: true },
+      create: {
+        ...post,
+        publicado: true,
+        contenido:
+          "El cuidado de la piel coreano se basa en la constancia y en escuchar lo que tu piel necesita. En AGAPEK seleccionamos productos originales y te acompañamos con asesoría personalizada por WhatsApp para que armes la rutina perfecta para ti.\n\nRecuerda: menos es más al inicio. Empieza con limpieza, hidratación y protección solar, y ve sumando productos según tu tipo de piel y tus objetivos.",
+      },
+    });
+  }
+
   void Rol; // enum disponible para futuros seeds de usuarios
   console.log("✅ Seed completado.");
 }
