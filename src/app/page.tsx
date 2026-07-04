@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf, Quote, ShieldCheck, Star, Truck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -161,19 +162,27 @@ export default async function HomePage() {
       )}
 
       {/* CTA */}
-      <section className="bg-foreground">
-        <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:py-20">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-background sm:text-4xl">
+      <section className="relative overflow-hidden">
+        <Image
+          src="/banners/foto-2.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#7e2a52] via-[#c14d87]/90 to-[#e65d99]/70" />
+        <div className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:py-24">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Tu rutina ideal empieza con una buena guía
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-background/70 sm:text-base">
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">
             Escríbenos y recibe asesoría personalizada por WhatsApp para armar tu
             rutina de skincare coreano.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#7e2a52] shadow-sm transition-transform hover:-translate-y-0.5"
             >
               Explorar catálogo
               <ArrowRight className="size-4" />
@@ -183,7 +192,7 @@ export default async function HomePage() {
                 href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-background/30 px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+                className="inline-flex items-center gap-2 rounded-full border border-white/50 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
               >
                 Consultar por WhatsApp
               </a>
