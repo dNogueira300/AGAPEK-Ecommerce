@@ -27,6 +27,13 @@ export async function requireAdmin(): Promise<PerfilConEmail> {
   return d;
 }
 
+/** Lanza si el rol no está entre los permitidos. */
+export async function requireRoles(roles: Rol[]): Promise<PerfilConEmail> {
+  const d = await getPerfil();
+  if (!d || !roles.includes(d.perfil.rol)) throw new Error("No autorizado");
+  return d;
+}
+
 /** Devuelve el Perfil del usuario, creándolo si aún no existe. */
 export async function getPerfil(): Promise<PerfilConEmail | null> {
   const user = await getUser();
