@@ -99,15 +99,19 @@ export default async function HomePage() {
           {BENEFITS.map((b) => (
             <div
               key={b.title}
-              className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-sm"
+              className="reveal group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
             >
-              <span className="flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
-                <b.icon className="size-5.5" />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full bg-primary/5 transition-transform duration-500 group-hover:scale-150"
+              />
+              <span className="relative flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-secondary text-primary transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                <b.icon className="size-6" />
               </span>
-              <h2 className="mt-4 font-display text-lg font-semibold text-foreground">
+              <h2 className="relative mt-4 font-display text-lg font-semibold text-foreground">
                 {b.title}
               </h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+              <p className="relative mt-1.5 text-sm leading-relaxed text-muted-foreground">
                 {b.text}
               </p>
             </div>
@@ -127,7 +131,7 @@ export default async function HomePage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Los favoritos de nuestras clientas en Iquitos.
           </p>
-          <div className="mt-10 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 lg:grid-cols-4">
+          <div className="reveal mt-10 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 lg:grid-cols-4">
             {masVendidos.slice(0, 4).map((p) => (
               <ProductCard key={p.slug} p={p} />
             ))}
@@ -145,7 +149,7 @@ export default async function HomePage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Descubre los últimos productos coreanos que acaban de llegar.
             </p>
-            <div className="mt-10 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 lg:grid-cols-4">
+            <div className="reveal mt-10 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 lg:grid-cols-4">
               {nuevosCards.slice(0, 4).map((p) => (
                 <ProductCard key={p.slug} p={p} />
               ))}
@@ -171,7 +175,7 @@ export default async function HomePage() {
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#7e2a52] via-[#c14d87]/90 to-[#e65d99]/70" />
-        <div className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:py-24">
+        <div className="reveal relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:py-24">
           <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             Tu rutina ideal empieza con una buena guía
           </h2>
@@ -208,7 +212,7 @@ export default async function HomePage() {
             <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
               Lo que dice nuestra comunidad
             </h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
+            <div className="reveal mt-10 grid gap-5 md:grid-cols-3">
               {testimonios.map((t) => (
                 <figure
                   key={t.id}

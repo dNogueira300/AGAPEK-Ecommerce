@@ -111,10 +111,10 @@ export function ProductCard({ p }: { p: ProductCardData }) {
               href={p.consultaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-chart-5/40 text-sm font-semibold text-[color:var(--chart-5)] transition-colors hover:bg-chart-5/10"
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-chart-5/40 px-2 text-sm font-semibold text-[color:var(--chart-5)] transition-colors hover:bg-chart-5/10"
             >
-              <MessageCircle className="size-4" />
-              Consultar WhatsApp
+              <MessageCircle className="size-4 shrink-0" />
+              WhatsApp
             </a>
           )}
         </div>
