@@ -15,3 +15,9 @@ export async function getRedesSociales(): Promise<RedesSociales> {
     tiktok: str(c.tiktok),
   };
 }
+
+/** URL del logo de la tienda (null si usa el logo por defecto). */
+export async function getLogoUrl(): Promise<string | null> {
+  const row = await prisma.configuracion.findUnique({ where: { clave: "logo_url" } });
+  return str(row?.valor);
+}

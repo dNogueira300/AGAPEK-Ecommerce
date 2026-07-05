@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles } from "lucide-react";
 import { SocialLinks, type RedesSociales } from "@/components/tienda/social-links";
+import { BrandLogo } from "@/components/tienda/brand-logo";
 
 const COLUMNS = [
   {
@@ -34,7 +34,13 @@ const COLUMNS = [
   },
 ];
 
-export function SiteFooter({ redes }: { redes: RedesSociales }) {
+export function SiteFooter({
+  redes,
+  logoUrl,
+}: {
+  redes: RedesSociales;
+  logoUrl: string | null;
+}) {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
 
@@ -43,19 +49,7 @@ export function SiteFooter({ redes }: { redes: RedesSociales }) {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-xs">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Sparkles className="size-4.5" strokeWidth={2.25} />
-              </span>
-              <span className="flex flex-col leading-none">
-                <span className="font-display text-lg font-semibold tracking-wide">
-                  AGAPEK
-                </span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                  Bloom &amp; Glow
-                </span>
-              </span>
-            </div>
+            <BrandLogo logoUrl={logoUrl} />
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               Skincare coreano para la piel loretana. Productos originales,
               rutinas a tu medida y asesoría personalizada por WhatsApp.

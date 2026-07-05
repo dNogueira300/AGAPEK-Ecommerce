@@ -38,7 +38,7 @@ export default async function AdminConfiguracion() {
         Datos del negocio usados en la tienda y el checkout.
       </p>
       <div className="mt-6">
-        <ConfigForm values={values} />
+        <ConfigForm values={values} logoUrl={str(c.logo_url) || null} />
       </div>
     </div>
   );

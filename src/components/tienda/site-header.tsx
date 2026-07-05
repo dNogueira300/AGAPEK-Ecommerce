@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Heart, Menu, Search, ShoppingBag, Sparkles, User, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { contarItems, useCart, useCartHydrated } from "@/stores/cart";
+import { BrandLogo } from "@/components/tienda/brand-logo";
 
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
@@ -20,7 +21,13 @@ interface SesionHeader {
   nombre: string;
 }
 
-export function SiteHeader({ sesion }: { sesion: SesionHeader | null }) {
+export function SiteHeader({
+  sesion,
+  logoUrl,
+}: {
+  sesion: SesionHeader | null;
+  logoUrl: string | null;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const items = useCart((s) => s.items);
@@ -34,18 +41,8 @@ export function SiteHeader({ sesion }: { sesion: SesionHeader | null }) {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-            <Sparkles className="size-4.5" strokeWidth={2.25} />
-          </span>
-          <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-semibold tracking-wide text-foreground">
-              AGAPEK
-            </span>
-            <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-              Bloom &amp; Glow
-            </span>
-          </span>
+        <Link href="/" className="flex shrink-0 items-center">
+          <BrandLogo logoUrl={logoUrl} />
         </Link>
 
         {/* Desktop nav */}

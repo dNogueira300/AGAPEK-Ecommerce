@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { Check, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useActionState, useState } from "react";
+import { Check, ImagePlus, Loader2 } from "lucide-react";
 import { guardarConfiguracion, type ConfigState } from "@/lib/config-actions";
 
 const input =
@@ -43,14 +44,51 @@ function Campo({
   );
 }
 
-export function ConfigForm({ values }: { values: ConfigValues }) {
+export function ConfigForm({
+  values,
+  logoUrl,
+}: {
+  values: ConfigValues;
+  logoUrl: string | null;
+}) {
   const [state, formAction, pending] = useActionState<ConfigState, FormData>(
     guardarConfiguracion,
     {},
   );
+  const [logoPreview, setLogoPreview] = useState<string | null>(logoUrl);
 
   return (
     <form action={formAction} className="max-w-3xl space-y-6">
+      <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
+        <h2 className="font-display text-lg font-semibold text-foreground">Logo de la tienda</h2>
+        <div className="flex items-center gap-4">
+          <label className="relative flex h-20 w-40 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-secondary">
+            {logoPreview ? (
+              <Image src={logoPreview} alt="Logo" fill unoptimized className="object-contain p-2" />
+            ) : (
+              <span className="flex flex-col items-center gap-1 text-xs text-muted-foreground">
+                <ImagePlus className="size-5 text-primary" />
+                Subir logo
+              </span>
+            )}
+            <input
+              type="file"
+              name="logo"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                setLogoPreview(f ? URL.createObjectURL(f) : logoUrl);
+              }}
+              className="hidden"
+            />
+          </label>
+          <p className="text-sm text-muted-foreground">
+            Reemplaza el logo de AGAPEK en el encabezado y el pie. Se optimiza a WebP.
+            Si lo dejas vacío, se usa el logo por defecto.
+          </p>
+        </div>
+      </section>
+
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
         <h2 className="font-display text-lg font-semibold text-foreground">Contacto</h2>
         <Campo name="whatsapp" label="WhatsApp de ventas (con código país, ej. 51961075865)" value={values.whatsapp} />
