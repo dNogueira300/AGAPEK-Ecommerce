@@ -159,6 +159,12 @@ export default async function PedidoPage({
             <dt className="text-muted-foreground">Subtotal</dt>
             <dd className="font-medium text-foreground">{soles(Number(pedido.subtotal))}</dd>
           </div>
+          {Number(pedido.descuento) > 0 && (
+            <div className="flex justify-between text-[color:var(--chart-5)]">
+              <dt>Descuento{pedido.cuponCodigo ? ` (${pedido.cuponCodigo})` : ""}</dt>
+              <dd className="font-medium">−{soles(Number(pedido.descuento))}</dd>
+            </div>
+          )}
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Envío</dt>
             <dd className="font-medium text-foreground">{soles(Number(pedido.costoEnvio))}</dd>

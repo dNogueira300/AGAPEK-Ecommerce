@@ -99,6 +99,9 @@ export default async function PedidoDetalle({
             </ul>
             <dl className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm">
               <div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd className="text-foreground">{soles(Number(pedido.subtotal))}</dd></div>
+              {Number(pedido.descuento) > 0 && (
+                <div className="flex justify-between text-[color:var(--chart-5)]"><dt>Descuento{pedido.cuponCodigo ? ` (${pedido.cuponCodigo})` : ""}</dt><dd className="font-medium">−{soles(Number(pedido.descuento))}</dd></div>
+              )}
               <div className="flex justify-between"><dt className="text-muted-foreground">Envío</dt><dd className="text-foreground">{soles(Number(pedido.costoEnvio))}</dd></div>
               <div className="flex justify-between border-t border-border pt-1.5 font-semibold"><dt className="text-foreground">Total</dt><dd className="text-foreground">{soles(Number(pedido.total))}</dd></div>
             </dl>

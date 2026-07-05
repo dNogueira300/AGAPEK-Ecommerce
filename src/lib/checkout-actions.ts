@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BUCKET } from "@/lib/supabase/storage";
+import { calcularDescuento } from "@/lib/cupon";
 
 const itemSchema = z.object({
   slug: z.string().min(1),
@@ -23,6 +24,7 @@ const checkoutSchema = z.object({
   referencia: z.string().optional(),
   metodoPago: z.enum(["CONTRA_ENTREGA", "YAPE", "PLIN", "TRANSFERENCIA", "DEPOSITO"]),
   observaciones: z.string().optional(),
+  cupon: z.string().optional(),
   items: z.array(itemSchema).min(1, "Tu carrito está vacío."),
 });
 
@@ -87,7 +89,31 @@ export async function crearPedido(raw: CheckoutInput): Promise<CrearPedidoResult
 
   const subtotal = lineas.reduce((s, l) => s + l.precio * l.cantidad, 0);
   const envio = await costoEnvio(input.metodoEntrega, input.zona);
-  const total = subtotal + envio;
+
+  // Cupón (revalidado en servidor; nunca se confía en el descuento del cliente).
+  let descuento = 0;
+  let cuponId: string | null = null;
+  let cuponCodigo: string | null = null;
+  if (input.cupon?.trim()) {
+    const codigo = input.cupon.trim().toUpperCase();
+    const cupon = await prisma.cupon.findUnique({ where: { codigo } });
+    const now = new Date();
+    const invalido =
+      !cupon ||
+      !cupon.activo ||
+      (cupon.inicioAt && now < cupon.inicioAt) ||
+      (cupon.finAt && now > cupon.finAt) ||
+      (cupon.usoMaximo != null && cupon.usos >= cupon.usoMaximo) ||
+      subtotal < Number(cupon.minCompra);
+    if (invalido) {
+      return { error: "El cupón ya no es válido. Revísalo e inténtalo de nuevo." };
+    }
+    descuento = calcularDescuento(cupon!.tipo, Number(cupon!.valor), subtotal);
+    cuponId = cupon!.id;
+    cuponCodigo = cupon!.codigo;
+  }
+
+  const total = Math.max(0, subtotal - descuento) + envio;
 
   // Actualiza datos de contacto del perfil (best-effort).
   await prisma.perfil.update({
@@ -109,6 +135,19 @@ export async function crearPedido(raw: CheckoutInput): Promise<CrearPedidoResult
           if (upd.count !== 1) throw new Error(`Sin stock: ${l.producto.nombre}`);
         }
 
+        // Consumo atómico del cupón (respeta el límite de usos ante concurrencia).
+        if (cuponId) {
+          const upd = await tx.cupon.updateMany({
+            where: {
+              id: cuponId,
+              activo: true,
+              OR: [{ usoMaximo: null }, { usos: { lt: prisma.cupon.fields.usoMaximo } }],
+            },
+            data: { usos: { increment: 1 } },
+          });
+          if (upd.count !== 1) throw new Error("Cupón sin cupos");
+        }
+
         await tx.pedido.create({
           data: {
             codigo,
@@ -117,6 +156,8 @@ export async function crearPedido(raw: CheckoutInput): Promise<CrearPedidoResult
             metodoEntrega: input.metodoEntrega,
             costoEnvio: new Prisma.Decimal(envio),
             subtotal: new Prisma.Decimal(subtotal),
+            descuento: new Prisma.Decimal(descuento),
+            cuponCodigo,
             total: new Prisma.Decimal(total),
             observaciones: input.observaciones,
             items: {
@@ -144,6 +185,9 @@ export async function crearPedido(raw: CheckoutInput): Promise<CrearPedidoResult
       const msg = e instanceof Error ? e.message : "";
       if (msg.startsWith("Sin stock")) {
         return { error: "Uno de los productos se quedó sin stock. Revisa tu carrito." };
+      }
+      if (msg.startsWith("Cupón sin cupos")) {
+        return { error: "El cupón alcanzó su límite de usos." };
       }
       // Colisión de código u otro error transitorio → reintenta.
       if (intento === 4) return { error: "No se pudo crear el pedido. Intenta de nuevo." };

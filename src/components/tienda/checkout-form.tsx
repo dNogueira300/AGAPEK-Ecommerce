@@ -3,13 +3,15 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { Loader2, ShoppingBag, Tag, X } from "lucide-react";
 import {
   subtotalCarrito,
   useCart,
   useCartHydrated,
 } from "@/stores/cart";
 import { crearPedido, type CheckoutInput } from "@/lib/checkout-actions";
+import { validarCupon, type CuponAplicado } from "@/lib/cupon-actions";
+import { calcularDescuento } from "@/lib/cupon";
 import { cn } from "@/lib/utils";
 
 export interface CheckoutConfig {
@@ -67,12 +69,39 @@ export function CheckoutForm({
   const [metodoPago, setMetodoPago] =
     useState<CheckoutInput["metodoPago"]>("YAPE");
 
+  const [cupon, setCupon] = useState<CuponAplicado | null>(null);
+  const [cuponInput, setCuponInput] = useState("");
+  const [cuponError, setCuponError] = useState<string | null>(null);
+  const [cuponPending, startCupon] = useTransition();
+
   const subtotal = subtotalCarrito(items);
   const envio = useMemo(() => {
     if (metodoEntrega !== "DELIVERY_LOCAL") return 0;
     return zona === "otras" ? config.deliveryOtras : config.deliveryCentrico;
   }, [metodoEntrega, zona, config]);
-  const total = subtotal + envio;
+  // El descuento se recalcula sobre el subtotal actual (el servidor lo revalida).
+  const descuento = cupon ? calcularDescuento(cupon.tipo, cupon.valor, subtotal) : 0;
+  const total = Math.max(0, subtotal - descuento) + envio;
+
+  const aplicarCupon = () => {
+    setCuponError(null);
+    startCupon(async () => {
+      const res = await validarCupon(cuponInput, subtotal);
+      if ("error" in res) {
+        setCupon(null);
+        setCuponError(res.error);
+      } else {
+        setCupon(res);
+        setCuponInput(res.codigo);
+      }
+    });
+  };
+
+  const quitarCupon = () => {
+    setCupon(null);
+    setCuponInput("");
+    setCuponError(null);
+  };
 
   if (!hydrated) return <div className="py-20" />;
 
@@ -108,6 +137,7 @@ export function CheckoutForm({
       referencia: String(fd.get("referencia") ?? "") || undefined,
       metodoPago,
       observaciones: String(fd.get("observaciones") ?? "") || undefined,
+      cupon: cupon?.codigo,
       items: items.map((i) => ({ slug: i.slug, cantidad: i.cantidad })),
     };
 
@@ -289,11 +319,57 @@ export function CheckoutForm({
             </li>
           ))}
         </ul>
+        {/* Cupón */}
+        <div className="mt-4 border-t border-border pt-4">
+          {cupon ? (
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-primary/5 px-3 py-2.5">
+              <span className="flex min-w-0 items-center gap-2 text-sm">
+                <Tag className="size-4 shrink-0 text-primary" />
+                <span className="truncate font-semibold text-foreground">{cupon.codigo}</span>
+                <span className="shrink-0 text-muted-foreground">aplicado</span>
+              </span>
+              <button
+                type="button"
+                onClick={quitarCupon}
+                aria-label="Quitar cupón"
+                className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                value={cuponInput}
+                onChange={(e) => setCuponInput(e.target.value.toUpperCase())}
+                placeholder="Código de cupón"
+                className="h-10 w-full rounded-full border border-input bg-card px-4 text-sm uppercase text-foreground outline-none placeholder:normal-case placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+              />
+              <button
+                type="button"
+                onClick={aplicarCupon}
+                disabled={cuponPending || !cuponInput.trim()}
+                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+              >
+                {cuponPending && <Loader2 className="size-3.5 animate-spin" />}
+                Aplicar
+              </button>
+            </div>
+          )}
+          {cuponError && <p className="mt-2 text-xs text-destructive">{cuponError}</p>}
+        </div>
+
         <dl className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Subtotal</dt>
             <dd className="font-medium text-foreground">{soles(subtotal)}</dd>
           </div>
+          {descuento > 0 && (
+            <div className="flex justify-between text-[color:var(--chart-5)]">
+              <dt>Descuento{cupon ? ` (${cupon.codigo})` : ""}</dt>
+              <dd className="font-medium">−{soles(descuento)}</dd>
+            </div>
+          )}
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Envío</dt>
             <dd className="font-medium text-foreground">

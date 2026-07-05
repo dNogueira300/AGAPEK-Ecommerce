@@ -138,6 +138,8 @@ model Pedido {
   comprobanteUrl String?
   costoEnvio     Decimal           @default(0) @db.Decimal(10, 2)
   subtotal       Decimal           @db.Decimal(10, 2)
+  descuento      Decimal           @default(0) @db.Decimal(10, 2)
+  cuponCodigo    String?
   total          Decimal           @db.Decimal(10, 2)
   observaciones  String?
   items          PedidoItem[]
@@ -167,6 +169,28 @@ model PedidoHistorial {
   nota      String?
   autorId   String?      @db.Uuid
   createdAt DateTime     @default(now()) @db.Timestamptz(6)
+}
+
+enum TipoCupon {
+  PORCENTAJE
+  MONTO_FIJO
+}
+
+/// Cupón de descuento a nivel de pedido (Fase 5).
+model Cupon {
+  id          String    @id @default(cuid())
+  codigo      String    @unique
+  descripcion String?
+  tipo        TipoCupon
+  valor       Decimal   @db.Decimal(10, 2) // % (0-100) o monto en soles
+  minCompra   Decimal   @default(0) @db.Decimal(10, 2)
+  usoMaximo   Int? // null = ilimitado
+  usos        Int       @default(0)
+  activo      Boolean   @default(true)
+  inicioAt    DateTime? @db.Timestamptz(6)
+  finAt       DateTime? @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
 }
 
 /// Configuración clave-valor del negocio (RN-08): WhatsApp, pagos, delivery, horarios...
