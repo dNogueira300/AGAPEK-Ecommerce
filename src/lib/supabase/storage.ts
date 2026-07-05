@@ -12,6 +12,7 @@ export const CARPETA = {
   productos: "productos",
   banners: "banners",
   marcas: "marcas",
+  rutinas: "rutinas",
 } as const;
 
 export type CarpetaPublica = keyof typeof CARPETA;

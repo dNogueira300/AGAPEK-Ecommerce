@@ -101,6 +101,7 @@ model Producto {
   categoria        Categoria        @relation(fields: [categoriaId], references: [id])
   imagenes         ProductoImagen[]
   favoritoDe       Perfil[]         @relation("Favoritos")
+  pasosRutina      RutinaPaso[]     @relation("RutinaPasoProductos")
   createdAt        DateTime         @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime         @updatedAt @db.Timestamptz(6)
 
@@ -174,6 +175,40 @@ model PedidoHistorial {
 enum TipoCupon {
   PORCENTAJE
   MONTO_FIJO
+}
+
+enum MomentoRutina {
+  DIA
+  NOCHE
+  AMBOS
+}
+
+/// Rutina de skincare curada por el admin, segmentada por tipo de piel (Fase 5).
+model Rutina {
+  id          String       @id @default(cuid())
+  titulo      String
+  slug        String       @unique
+  descripcion String?
+  tipoPiel    String // grasa | seca | mixta | sensible | normal | todas
+  portadaUrl  String?
+  orden       Int          @default(0)
+  publicado   Boolean      @default(false)
+  pasos       RutinaPaso[]
+  createdAt   DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(6)
+}
+
+model RutinaPaso {
+  id          String        @id @default(cuid())
+  rutinaId    String
+  rutina      Rutina        @relation(fields: [rutinaId], references: [id], onDelete: Cascade)
+  orden       Int           @default(0)
+  titulo      String
+  descripcion String?
+  momento     MomentoRutina @default(AMBOS)
+  productos   Producto[]    @relation("RutinaPasoProductos")
+
+  @@index([rutinaId])
 }
 
 /// Cupón de descuento a nivel de pedido (Fase 5).

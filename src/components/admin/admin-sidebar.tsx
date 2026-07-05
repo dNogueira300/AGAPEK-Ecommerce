@@ -34,6 +34,7 @@ const NAV = [
   { href: "/admin/categorias", label: "Categorías", icon: Tags, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/marcas", label: "Marcas", icon: Store, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/blog", label: "Blog", icon: Newspaper, roles: ["ADMIN", "TECNICO"] },
+  { href: "/admin/rutinas", label: "Rutinas", icon: Sparkles, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/testimonios", label: "Testimonios", icon: Quote, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/cupones", label: "Cupones", icon: Tag, roles: ["ADMIN", "TECNICO"] },
