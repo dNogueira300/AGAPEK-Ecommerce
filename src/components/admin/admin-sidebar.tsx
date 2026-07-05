@@ -43,7 +43,15 @@ const NAV = [
   { href: "/admin/usuarios", label: "Usuarios", icon: UserCog, roles: ["ADMIN", "TECNICO"] },
 ] as const;
 
-export function AdminSidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
+export function AdminSidebar({
+  rol,
+  nombre,
+  reclamosPendientes = 0,
+}: {
+  rol: Rol;
+  nombre: string;
+  reclamosPendientes?: number;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const items = NAV.filter((n) => (n.roles as readonly string[]).includes(rol));
@@ -66,7 +74,20 @@ export function AdminSidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
           )}
         >
           <it.icon className="size-4.5" />
-          {it.label}
+          <span className="flex-1">{it.label}</span>
+          {it.href === "/admin/reclamos" && reclamosPendientes > 0 && (
+            <span
+              className={cn(
+                "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                isActive(it.href)
+                  ? "bg-primary-foreground text-primary"
+                  : "bg-primary text-primary-foreground",
+              )}
+              aria-label={`${reclamosPendientes} reclamos por atender`}
+            >
+              {reclamosPendientes > 99 ? "99+" : reclamosPendientes}
+            </span>
+          )}
         </Link>
       ))}
     </nav>
