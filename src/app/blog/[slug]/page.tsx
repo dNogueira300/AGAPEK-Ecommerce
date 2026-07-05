@@ -47,7 +47,9 @@ export default async function PostPage({
         <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           {post.titulo}
         </h1>
-        <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
+        <p className="mt-3 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+          {post.autor && <span className="font-medium text-foreground/70">Por {post.autor}</span>}
+          {post.autor && <span>·</span>}
           <CalendarDays className="size-4" />
           {formatFechaCorta(post.createdAt)}
         </p>

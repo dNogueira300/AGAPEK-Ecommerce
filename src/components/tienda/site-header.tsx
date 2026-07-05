@@ -9,12 +9,11 @@ import { contarItems, useCart, useCartHydrated } from "@/stores/cart";
 
 const NAV_LINKS = [
   { href: "/", label: "Inicio" },
-  { href: "/catalogo", label: "Tienda" },
-  { href: "/catalogo?cat=skincare", label: "Skincare" },
-  { href: "/catalogo?cat=makeup", label: "Makeup" },
-  { href: "/catalogo?cat=cuerpo-y-bienestar", label: "Cuerpo" },
+  { href: "/catalogo", label: "Catálogo" },
+  { href: "/rutinas", label: "Rutinas" },
   { href: "/blog", label: "Blog" },
   { href: "/nosotros", label: "Nosotros" },
+  { href: "/contacto", label: "Contacto" },
 ];
 
 interface SesionHeader {

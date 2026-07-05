@@ -7,7 +7,7 @@ import { CatalogSidebar } from "@/components/tienda/catalog-sidebar";
 import { CatalogSort } from "@/components/tienda/catalog-sort";
 
 export const metadata: Metadata = {
-  title: "Tienda",
+  title: "Catálogo",
   description: "Explora productos coreanos de skincare originales en AGAPEK.",
 };
 
@@ -88,9 +88,9 @@ export default async function CatalogoPage({
       {/* Encabezado */}
       <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs text-muted-foreground">Inicio / Tienda</p>
+          <p className="text-xs text-muted-foreground">Inicio / Catálogo</p>
           <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {busqueda ? `Resultados para “${busqueda}”` : "Tienda"}
+            {busqueda ? `Resultados para “${busqueda}”` : "Catálogo"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {cards.length} producto{cards.length === 1 ? "" : "s"}

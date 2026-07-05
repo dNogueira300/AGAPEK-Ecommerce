@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatFechaCorta } from "@/lib/date";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,16 @@ export const metadata: Metadata = {
   description: "Consejos de expertas y secretos del K-Beauty para cuidar tu piel.",
 };
 export const dynamic = "force-dynamic";
+
+function Meta({ autor, fecha }: { autor: string | null; fecha: Date }) {
+  return (
+    <p className="text-xs text-muted-foreground">
+      {autor && <span className="font-medium text-foreground/70">Por {autor}</span>}
+      {autor && " · "}
+      {formatFechaCorta(fecha)}
+    </p>
+  );
+}
 
 export default async function BlogPage({
   searchParams,
@@ -38,7 +48,8 @@ export default async function BlogPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <header className="text-center">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">The AGAPEK Journal</p>
+        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
           Blog de Skincare
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
@@ -46,7 +57,7 @@ export default async function BlogPage({
         </p>
       </header>
 
-      {/* Filtros por categoría */}
+      {/* Categorías */}
       <nav className="mt-8 flex flex-wrap justify-center gap-2">
         <Link
           href="/blog"
@@ -76,82 +87,74 @@ export default async function BlogPage({
           Pronto publicaremos nuevos artículos.
         </p>
       ) : (
-        <div className="mt-10 space-y-8">
-          {/* Destacado */}
+        <div className="mt-10 space-y-12">
+          {/* Destacado (card superpuesta) */}
           {destacado && (
-            <Link
-              href={`/blog/${destacado.slug}`}
-              className="group grid overflow-hidden rounded-3xl border border-border bg-card md:grid-cols-2"
-            >
-              <div className="relative aspect-[16/10] md:aspect-auto">
-                <Image
-                  src={destacado.portadaUrl ?? "/productos/generico.svg"}
-                  alt={destacado.titulo}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <div className="flex flex-col justify-center p-8">
-                {destacado.categoria && (
-                  <span className="w-fit rounded-full bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                    {destacado.categoria}
-                  </span>
-                )}
-                <h2 className="mt-3 font-display text-2xl font-semibold text-foreground">
-                  {destacado.titulo}
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {destacado.resumen}
-                </p>
-                <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays className="size-3.5" />
-                    {formatFechaCorta(destacado.createdAt)}
+            <article className="relative">
+              <Link href={`/blog/${destacado.slug}`} className="group block">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl md:aspect-[21/9]">
+                  <Image
+                    src={destacado.portadaUrl ?? "/productos/generico.svg"}
+                    alt={destacado.titulo}
+                    fill
+                    sizes="100vw"
+                    priority
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="relative z-10 mx-4 -mt-16 rounded-3xl border border-border bg-card p-7 shadow-xl sm:mx-8 md:absolute md:right-10 md:top-1/2 md:mx-0 md:mt-0 md:max-w-md md:-translate-y-1/2">
+                  {destacado.categoria && (
+                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                      {destacado.categoria}
+                    </span>
+                  )}
+                  <h2 className="mt-2 font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
+                    {destacado.titulo}
+                  </h2>
+                  <div className="mt-2">
+                    <Meta autor={destacado.autor} fecha={destacado.createdAt} />
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    {destacado.resumen}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                    Continuar <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                  Leer más <ArrowRight className="size-4" />
-                </span>
-              </div>
-            </Link>
+              </Link>
+            </article>
           )}
 
           {/* Grid */}
           {resto.length > 0 && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="reveal grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {resto.map((post) => (
-                <Link
-                  key={post.id}
-                  href={`/blog/${post.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <Image
-                      src={post.portadaUrl ?? "/productos/generico.svg"}
-                      alt={post.titulo}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    {post.categoria && (
-                      <span className="w-fit rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
-                        {post.categoria}
-                      </span>
-                    )}
-                    <h3 className="mt-2 font-display text-lg font-semibold text-foreground">
-                      {post.titulo}
-                    </h3>
-                    <p className="mt-1.5 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {post.resumen}
-                    </p>
-                    <span className="mt-3 text-xs text-muted-foreground">
-                      {formatFechaCorta(post.createdAt)}
-                    </span>
-                  </div>
-                </Link>
+                <article key={post.id}>
+                  <Link href={`/blog/${post.slug}`} className="group block">
+                    <div className="relative aspect-[16/11] overflow-hidden rounded-2xl">
+                      <Image
+                        src={post.portadaUrl ?? "/productos/generico.svg"}
+                        alt={post.titulo}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="mt-4">
+                      {post.categoria && (
+                        <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                          {post.categoria}
+                        </span>
+                      )}
+                      <h3 className="mt-1.5 font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                        {post.titulo}
+                      </h3>
+                      <div className="mt-2">
+                        <Meta autor={post.autor} fecha={post.createdAt} />
+                      </div>
+                    </div>
+                  </Link>
+                </article>
               ))}
             </div>
           )}

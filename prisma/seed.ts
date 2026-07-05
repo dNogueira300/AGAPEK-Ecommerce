@@ -194,6 +194,7 @@ async function main() {
       slug: "como-iniciar-tu-rutina-de-skincare-coreano",
       titulo: "Cómo iniciar tu rutina de skincare coreano",
       categoria: "Rutinas",
+      autor: "Equipo AGAPEK",
       resumen:
         "Descubre los 10 pasos esenciales del skincare coreano y cómo adaptarlos a tu vida diaria para una piel radiante.",
       portadaUrl: "/banners/foto-1.webp",
@@ -239,7 +240,9 @@ async function main() {
       portadaUrl: "/banners/foto-2.webp",
     },
   ];
-  for (const post of POSTS) {
+  const AUTORES = ["Equipo AGAPEK", "Doyla Yamashita", "Asesora AGAPEK"];
+  for (let pi = 0; pi < POSTS.length; pi++) {
+    const post = { autor: AUTORES[pi % AUTORES.length], ...POSTS[pi] };
     await prisma.post.upsert({
       where: { slug: post.slug },
       update: { ...post, publicado: true },

@@ -200,6 +200,7 @@ model Post {
   titulo     String
   slug       String   @unique
   categoria  String?
+  autor      String?
   resumen    String?
   contenido  String
   portadaUrl String?
