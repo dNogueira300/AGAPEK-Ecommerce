@@ -10,7 +10,7 @@ const COLUMNS = [
     title: "Tienda",
     links: [
       { href: "/catalogo", label: "Catálogo" },
-      { href: "/marcas", label: "Marcas" },
+      { href: "/catalogo", label: "Marcas" },
       { href: "/rutinas", label: "Arma tu rutina" },
       { href: "/blog", label: "Tips de skincare" },
     ],

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   BarChart3,
+  BookOpen,
   ExternalLink,
   Image as ImageIcon,
   LayoutDashboard,
@@ -36,6 +37,7 @@ const NAV = [
   { href: "/admin/testimonios", label: "Testimonios", icon: Quote, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart, roles: ["ADMIN", "TECNICO", "VENDEDOR"] },
   { href: "/admin/clientes", label: "Clientes", icon: Users, roles: ["ADMIN", "TECNICO", "VENDEDOR"] },
+  { href: "/admin/reclamos", label: "Reclamos", icon: BookOpen, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/reportes", label: "Reportes", icon: BarChart3, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/configuracion", label: "Configuración", icon: Settings, roles: ["ADMIN", "TECNICO"] },
   { href: "/admin/usuarios", label: "Usuarios", icon: UserCog, roles: ["ADMIN", "TECNICO"] },

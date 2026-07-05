@@ -195,6 +195,31 @@ model Testimonio {
   activo Boolean @default(true)
 }
 
+enum TipoReclamo {
+  RECLAMO
+  QUEJA
+}
+
+/// Libro de Reclamaciones (Indecopi).
+model Reclamo {
+  id               String      @id @default(cuid())
+  codigo           String      @unique
+  tipo             TipoReclamo
+  nombre           String
+  documento        String
+  domicilio        String?
+  telefono         String?
+  email            String
+  tipoBien         String?
+  descripcionBien  String?
+  monto            Decimal?    @db.Decimal(10, 2)
+  detalle          String
+  pedidoConsumidor String?
+  respuesta        String?
+  atendido         Boolean     @default(false)
+  createdAt        DateTime    @default(now()) @db.Timestamptz(6)
+}
+
 model Post {
   id         String   @id @default(cuid())
   titulo     String
