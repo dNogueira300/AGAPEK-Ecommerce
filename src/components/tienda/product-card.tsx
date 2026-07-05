@@ -26,7 +26,7 @@ export function ProductCard({ p }: { p: ProductCardData }) {
   const precioFinal = enOferta ? p.precioOferta! : p.precio;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
       <Link
         href={`/producto/${p.slug}`}
         className="relative block aspect-square overflow-hidden bg-secondary"

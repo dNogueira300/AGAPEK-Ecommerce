@@ -13,6 +13,9 @@ export const CLAVES = [
   "horario",
   "delivery_centrico",
   "delivery_otras",
+  "facebook",
+  "instagram",
+  "tiktok",
 ] as const;
 
 const NUMERICAS = ["delivery_centrico", "delivery_otras"];

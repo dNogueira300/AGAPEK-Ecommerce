@@ -119,11 +119,15 @@ async function main() {
     delivery_centrico: 5,
     delivery_otras: 10,
     horario: "Lun a Sáb 9:00 a.m. – 6:00 p.m.",
+    facebook: "https://facebook.com/AgapeK",
+    instagram: "",
+    tiktok: "",
   };
+  // update: {} para no sobrescribir lo que la administradora edite en el panel.
   for (const [clave, valor] of Object.entries(config)) {
     await prisma.configuracion.upsert({
       where: { clave },
-      update: { valor: valor as never },
+      update: {},
       create: { clave, valor: valor as never },
     });
   }

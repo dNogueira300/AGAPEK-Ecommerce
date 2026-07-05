@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
+import { SocialLinks, type RedesSociales } from "@/components/tienda/social-links";
 
 const COLUMNS = [
   {
@@ -33,7 +34,7 @@ const COLUMNS = [
   },
 ];
 
-export function SiteFooter() {
+export function SiteFooter({ redes }: { redes: RedesSociales }) {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
 
@@ -62,6 +63,7 @@ export function SiteFooter() {
             <p className="mt-4 text-sm text-muted-foreground">
               Iquitos, Perú · Lun a Sáb 9:00 a.m. – 6:00 p.m.
             </p>
+            <SocialLinks redes={redes} className="mt-5" />
           </div>
 
           {COLUMNS.map((col) => (

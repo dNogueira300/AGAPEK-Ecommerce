@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/tienda/site-header";
 import { SiteFooter } from "@/components/tienda/site-footer";
 import { getSesionUI } from "@/lib/auth";
+import { getRedesSociales } from "@/lib/config";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,7 +32,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const sesion = await getSesionUI();
+  const [sesion, redes] = await Promise.all([getSesionUI(), getRedesSociales()]);
 
   return (
     <html
@@ -41,7 +42,7 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <SiteHeader sesion={sesion} />
         <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <SiteFooter redes={redes} />
       </body>
     </html>
   );

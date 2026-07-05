@@ -26,6 +26,9 @@ export default async function AdminConfiguracion() {
     horario: str(c.horario),
     delivery_centrico: str(c.delivery_centrico, "5"),
     delivery_otras: str(c.delivery_otras, "10"),
+    facebook: str(c.facebook),
+    instagram: str(c.instagram),
+    tiktok: str(c.tiktok),
   };
 
   return (

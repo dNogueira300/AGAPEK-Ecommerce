@@ -17,6 +17,9 @@ export interface ConfigValues {
   horario: string;
   delivery_centrico: string;
   delivery_otras: string;
+  facebook: string;
+  instagram: string;
+  tiktok: string;
 }
 
 function Campo({
@@ -70,6 +73,16 @@ export function ConfigForm({ values }: { values: ConfigValues }) {
         </div>
         <Campo name="delivery_centrico" label="Costo zona céntrica (S/)" value={values.delivery_centrico} type="number" />
         <Campo name="delivery_otras" label="Costo otras zonas (S/)" value={values.delivery_otras} type="number" />
+      </section>
+
+      <section className="grid gap-4 rounded-2xl border border-border bg-card p-6 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <h2 className="font-display text-lg font-semibold text-foreground">Redes sociales</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Pega el enlace completo. Se dejan vacías las que no uses.</p>
+        </div>
+        <Campo name="facebook" label="Facebook (URL)" value={values.facebook} placeholder="https://facebook.com/AgapeK" />
+        <Campo name="instagram" label="Instagram (URL)" value={values.instagram} placeholder="https://instagram.com/…" />
+        <Campo name="tiktok" label="TikTok (URL)" value={values.tiktok} placeholder="https://tiktok.com/@…" />
       </section>
 
       <div className="flex items-center gap-3">

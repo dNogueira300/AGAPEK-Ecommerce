@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatFechaCorta } from "@/lib/date";
+import { getRedesSociales } from "@/lib/config";
+import { SocialLinks } from "@/components/tienda/social-links";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -29,7 +31,7 @@ export default async function BlogPage({
 }) {
   const { c } = await searchParams;
 
-  const [posts, todas] = await Promise.all([
+  const [posts, todas, marcas, redes] = await Promise.all([
     prisma.post.findMany({
       where: { publicado: true, ...(c ? { categoria: c } : {}) },
       orderBy: { createdAt: "desc" },
@@ -39,7 +41,10 @@ export default async function BlogPage({
       select: { categoria: true },
       distinct: ["categoria"],
     }),
+    prisma.marca.findMany({ where: { aliada: true }, orderBy: { nombre: "asc" } }),
+    getRedesSociales(),
   ]);
+  const hayRedes = !!(redes.facebook || redes.instagram || redes.tiktok);
 
   const categorias = todas.map((p) => p.categoria).filter((x): x is string => !!x);
   const destacado = !c ? posts[0] : undefined;
@@ -159,6 +164,42 @@ export default async function BlogPage({
             </div>
           )}
         </div>
+      )}
+
+      {/* Marcas destacadas */}
+      {marcas.length > 0 && (
+        <section className="mt-16 border-t border-border pt-12">
+          <h2 className="text-center font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Marcas destacadas
+          </h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Las marcas coreanas originales que encuentras en AGAPEK.
+          </p>
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {marcas.map((m) => (
+              <Link
+                key={m.id}
+                href={`/catalogo?marca=${m.slug}`}
+                className="flex items-center justify-center rounded-2xl border border-border bg-card p-6 text-center font-display text-base font-semibold text-foreground/80 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:text-primary hover:shadow-md"
+              >
+                {m.nombre}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Redes sociales */}
+      {hayRedes && (
+        <section className="mt-16 rounded-3xl border border-border bg-secondary/50 p-10 text-center">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Síguenos en redes
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Tips, novedades y rutinas todos los días.
+          </p>
+          <SocialLinks redes={redes} className="mt-6 justify-center" itemClassName="size-12" />
+        </section>
       )}
     </div>
   );
