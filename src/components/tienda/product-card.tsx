@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, Star } from "lucide-react";
 import { AddToCartWide } from "@/components/tienda/add-to-cart-button";
+import { FavoriteIconButton } from "@/components/tienda/favorite-button";
 
 export interface ProductCardData {
+  id: string;
   slug: string;
   nombre: string;
   marca: string;
@@ -17,6 +19,7 @@ export interface ProductCardData {
   reviews: number;
   consultaUrl: string | null;
   rating?: number;
+  favorito?: boolean;
 }
 
 const soles = (n: number) => `S/ ${n.toFixed(2)}`;
@@ -26,7 +29,7 @@ export function ProductCard({ p }: { p: ProductCardData }) {
   const precioFinal = enOferta ? p.precioOferta! : p.precio;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
       <Link
         href={`/producto/${p.slug}`}
         className="relative block aspect-square overflow-hidden bg-secondary"
@@ -59,6 +62,10 @@ export function ProductCard({ p }: { p: ProductCardData }) {
           </div>
         )}
       </Link>
+
+      <div className="absolute right-3 top-3 z-10">
+        <FavoriteIconButton productoId={p.id} inicial={p.favorito} />
+      </div>
 
       <div className="flex flex-1 flex-col p-4">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">

@@ -4,6 +4,7 @@ import { ArrowRight, Leaf, Quote, ShieldCheck, Star, Truck } from "lucide-react"
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/tienda/product-card";
 import { toProductCard } from "@/lib/product-card";
+import { getFavoritoIds } from "@/lib/favorito-actions";
 import { BrandMarquee } from "@/components/tienda/brand-marquee";
 import { HeroCarousel } from "@/components/tienda/hero-carousel";
 
@@ -66,8 +67,9 @@ export default async function HomePage() {
     masVendidosProd = [...masVendidosProd, ...extra].slice(0, 8);
   }
 
-  const masVendidos = masVendidosProd.map((p) => toProductCard(p, whatsapp));
-  const nuevosCards = nuevos.map((p) => toProductCard(p, whatsapp));
+  const favIds = await getFavoritoIds();
+  const masVendidos = masVendidosProd.map((p) => toProductCard(p, whatsapp, favIds.has(p.id)));
+  const nuevosCards = nuevos.map((p) => toProductCard(p, whatsapp, favIds.has(p.id)));
 
   return (
     <div>

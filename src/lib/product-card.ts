@@ -2,6 +2,7 @@ import type { ProductCardData } from "@/components/tienda/product-card";
 import { urlWhatsApp } from "@/lib/whatsapp";
 
 interface ProductoInput {
+  id: string;
   slug: string;
   nombre: string;
   precio: unknown;
@@ -21,8 +22,11 @@ function pseudoReviews(slug: string): number {
 export function toProductCard(
   p: ProductoInput,
   whatsapp: string | null,
+  favorito = false,
 ): ProductCardData {
   return {
+    id: p.id,
+    favorito,
     slug: p.slug,
     nombre: p.nombre,
     marca: p.marca.nombre,

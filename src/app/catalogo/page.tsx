@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/tienda/product-card";
 import { toProductCard } from "@/lib/product-card";
+import { getFavoritoIds } from "@/lib/favorito-actions";
 import { CatalogSidebar } from "@/components/tienda/catalog-sidebar";
 import { CatalogSort } from "@/components/tienda/catalog-sort";
 
@@ -81,7 +82,8 @@ export default async function CatalogoPage({
     orderBy: ORDEN[sort] ?? ORDEN.relevancia,
     include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
   });
-  const cards = productos.map((p) => toProductCard(p, whatsapp));
+  const favIds = await getFavoritoIds();
+  const cards = productos.map((p) => toProductCard(p, whatsapp, favIds.has(p.id)));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

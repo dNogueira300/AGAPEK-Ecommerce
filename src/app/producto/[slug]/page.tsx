@@ -6,6 +6,8 @@ import { ChevronRight, Leaf, MessageCircle, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { urlWhatsApp } from "@/lib/whatsapp";
 import { AddToCartFull } from "@/components/tienda/add-to-cart-button";
+import { FavoriteWideButton } from "@/components/tienda/favorite-button";
+import { getFavoritoIds } from "@/lib/favorito-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -47,8 +49,13 @@ export default async function ProductoPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [producto, whatsapp] = await Promise.all([getProducto(slug), getWhatsapp()]);
+  const [producto, whatsapp, favIds] = await Promise.all([
+    getProducto(slug),
+    getWhatsapp(),
+    getFavoritoIds(),
+  ]);
   if (!producto || !producto.activo) notFound();
+  const esFavorito = favIds.has(producto.id);
 
   const precio = Number(producto.precio);
   const precioOferta =
@@ -194,6 +201,10 @@ export default async function ProductoPage({
                 agotado={agotado}
               />
             )}
+          </div>
+
+          <div className="mt-3">
+            <FavoriteWideButton productoId={producto.id} inicial={esFavorito} />
           </div>
 
           {/* Detalle largo */}
