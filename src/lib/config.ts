@@ -1,15 +1,29 @@
 import { getConfigValor, getConfigValores } from "@/lib/cache";
-import type { RedesSociales } from "@/components/tienda/social-links";
+import type { RedesSociales, RedExtra } from "@/components/tienda/social-links";
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
+/** Valida el JSON de redes adicionales guardado en Configuracion (redes_extra). */
+export function parseRedesExtra(v: unknown): RedExtra[] {
+  if (!Array.isArray(v)) return [];
+  return v.filter(
+    (r): r is RedExtra =>
+      !!r &&
+      typeof r === "object" &&
+      typeof (r as RedExtra).nombre === "string" &&
+      typeof (r as RedExtra).url === "string" &&
+      typeof (r as RedExtra).iconoUrl === "string",
+  );
+}
+
 /** URLs de redes sociales configuradas (null si no están definidas). Con caché. */
 export async function getRedesSociales(): Promise<RedesSociales> {
-  const c = await getConfigValores(["facebook", "instagram", "tiktok"]);
+  const c = await getConfigValores(["facebook", "instagram", "tiktok", "redes_extra"]);
   return {
     facebook: str(c.facebook),
     instagram: str(c.instagram),
     tiktok: str(c.tiktok),
+    extras: parseRedesExtra(c.redes_extra),
   };
 }
 

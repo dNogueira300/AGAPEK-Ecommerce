@@ -1,7 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidarTag } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
@@ -68,7 +69,7 @@ export async function guardarMarca(
 
   revalidatePath("/admin/marcas");
   revalidatePath("/catalogo");
-  revalidateTag("marcas", "max");
+  invalidarTag("marcas");
   redirect("/admin/marcas");
 }
 
@@ -78,6 +79,6 @@ export async function eliminarMarca(id: string) {
   if (n === 0) {
     await prisma.marca.delete({ where: { id } });
     revalidatePath("/admin/marcas");
-    revalidateTag("marcas", "max");
+    invalidarTag("marcas");
   }
 }

@@ -1,7 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidarTag } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
@@ -38,7 +39,7 @@ export async function guardarCategoria(
 
   revalidatePath("/admin/categorias");
   revalidatePath("/catalogo");
-  revalidateTag("categorias", "max");
+  invalidarTag("categorias");
   redirect("/admin/categorias");
 }
 
@@ -48,6 +49,6 @@ export async function eliminarCategoria(id: string) {
   if (n === 0) {
     await prisma.categoria.delete({ where: { id } });
     revalidatePath("/admin/categorias");
-    revalidateTag("categorias", "max");
+    invalidarTag("categorias");
   }
 }
