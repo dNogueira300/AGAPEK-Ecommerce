@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRoles } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -33,9 +33,7 @@ export async function guardarConfiguracion(
   for (const clave of CLAVES) {
     const raw = formData.get(clave);
     if (raw === null) continue;
-    const valor: string | number = NUMERICAS.includes(clave)
-      ? Number(raw)
-      : String(raw);
+    const valor: string | number = NUMERICAS.includes(clave) ? Number(raw) : String(raw);
     await prisma.configuracion.upsert({
       where: { clave },
       update: { valor },
@@ -68,5 +66,6 @@ export async function guardarConfiguracion(
 
   revalidatePath("/", "layout");
   revalidatePath("/admin/configuracion");
+  revalidateTag("config", "max");
   return { ok: true };
 }

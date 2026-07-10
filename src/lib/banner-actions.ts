@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRoles } from "@/lib/auth";
@@ -59,7 +59,12 @@ export async function guardarBanner(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
   const d = parsed.data;
-  const enlace = d.enlace && (d.enlace.startsWith("/") || d.enlace.startsWith("http")) ? d.enlace : d.enlace ? `/${slugify(d.enlace)}` : null;
+  const enlace =
+    d.enlace && (d.enlace.startsWith("/") || d.enlace.startsWith("http"))
+      ? d.enlace
+      : d.enlace
+        ? `/${slugify(d.enlace)}`
+        : null;
 
   const file = formData.get("imagen");
   let imagenUrl: string | undefined;
@@ -86,6 +91,7 @@ export async function guardarBanner(
 
   revalidatePath("/admin/banners");
   revalidatePath("/");
+  revalidateTag("banners", "max");
   redirect("/admin/banners");
 }
 
@@ -96,6 +102,7 @@ export async function toggleActivoBanner(id: string) {
     await prisma.banner.update({ where: { id }, data: { activo: !b.activo } });
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag("banners", "max");
   }
 }
 
@@ -104,4 +111,5 @@ export async function eliminarBanner(id: string) {
   await prisma.banner.delete({ where: { id } });
   revalidatePath("/admin/banners");
   revalidatePath("/");
+  revalidateTag("banners", "max");
 }

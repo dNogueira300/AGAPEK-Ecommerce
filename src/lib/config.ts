@@ -1,14 +1,11 @@
-import { prisma } from "@/lib/prisma";
+import { getConfigValor, getConfigValores } from "@/lib/cache";
 import type { RedesSociales } from "@/components/tienda/social-links";
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
-/** URLs de redes sociales configuradas (null si no están definidas). */
+/** URLs de redes sociales configuradas (null si no están definidas). Con caché. */
 export async function getRedesSociales(): Promise<RedesSociales> {
-  const rows = await prisma.configuracion.findMany({
-    where: { clave: { in: ["facebook", "instagram", "tiktok"] } },
-  });
-  const c = Object.fromEntries(rows.map((r) => [r.clave, r.valor]));
+  const c = await getConfigValores(["facebook", "instagram", "tiktok"]);
   return {
     facebook: str(c.facebook),
     instagram: str(c.instagram),
@@ -16,8 +13,7 @@ export async function getRedesSociales(): Promise<RedesSociales> {
   };
 }
 
-/** URL del logo de la tienda (null si usa el logo por defecto). */
+/** URL del logo de la tienda (null si usa el logo por defecto). Con caché. */
 export async function getLogoUrl(): Promise<string | null> {
-  const row = await prisma.configuracion.findUnique({ where: { clave: "logo_url" } });
-  return str(row?.valor);
+  return getConfigValor("logo_url");
 }

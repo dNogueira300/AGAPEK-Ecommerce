@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
@@ -61,11 +61,14 @@ export async function guardarMarca(
       data: { nombre, slug, aliada, ...(logoUrl ? { logoUrl } : {}) },
     });
   } else {
-    await prisma.marca.create({ data: { nombre, slug, aliada, logoUrl: logoUrl ?? null } });
+    await prisma.marca.create({
+      data: { nombre, slug, aliada, logoUrl: logoUrl ?? null },
+    });
   }
 
   revalidatePath("/admin/marcas");
   revalidatePath("/catalogo");
+  revalidateTag("marcas", "max");
   redirect("/admin/marcas");
 }
 
@@ -75,5 +78,6 @@ export async function eliminarMarca(id: string) {
   if (n === 0) {
     await prisma.marca.delete({ where: { id } });
     revalidatePath("/admin/marcas");
+    revalidateTag("marcas", "max");
   }
 }

@@ -72,7 +72,9 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                 src={b.imagenUrl}
                 alt={b.titulo ?? "AGAPEK"}
                 fill
-                priority
+                priority={i === 0}
+                fetchPriority={i === 0 ? "high" : undefined}
+                quality={65}
                 sizes="100vw"
                 unoptimized={b.imagenUrl.endsWith(".svg")}
                 className={cn("object-cover", active && "animate-kenburns")}
