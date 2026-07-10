@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+/** Red social adicional administrable (con icono subido por la administradora). */
+export interface RedExtra {
+  nombre: string;
+  url: string;
+  iconoUrl: string;
+}
+
 export interface RedesSociales {
   facebook?: string | null;
   instagram?: string | null;
   tiktok?: string | null;
+  extras?: RedExtra[];
 }
 
 function Facebook({ className }: { className?: string }) {
@@ -16,7 +24,14 @@ function Facebook({ className }: { className?: string }) {
 }
 function Instagram({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className={className}
+      aria-hidden
+    >
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" />
@@ -47,10 +62,16 @@ export function SocialLinks({
   itemClassName?: string;
 }) {
   const activos = RED.filter((r) => redes[r.key]);
-  if (activos.length === 0) return null;
+  const extras = redes.extras ?? [];
+  if (activos.length === 0 && extras.length === 0) return null;
+
+  const itemClass = cn(
+    "flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground/80 transition-colors hover:border-primary/40 hover:bg-secondary hover:text-primary",
+    itemClassName,
+  );
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex flex-wrap items-center gap-3", className)}>
       {activos.map(({ key, label, Icon }) => (
         <Link
           key={key}
@@ -58,12 +79,22 @@ export function SocialLinks({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={label}
-          className={cn(
-            "flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground/80 transition-colors hover:border-primary/40 hover:bg-secondary hover:text-primary",
-            itemClassName,
-          )}
+          className={itemClass}
         >
           <Icon className="size-5" />
+        </Link>
+      ))}
+      {extras.map((r) => (
+        <Link
+          key={r.url}
+          href={r.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={r.nombre}
+          className={itemClass}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={r.iconoUrl} alt="" className="size-5 object-contain" />
         </Link>
       ))}
     </div>

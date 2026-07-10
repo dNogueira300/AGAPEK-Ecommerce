@@ -40,32 +40,42 @@ export default async function HomePage() {
     marca: true,
     imagenes: { orderBy: { orden: "asc" as const }, take: 1 },
   };
-  const [banners, destacados, nuevos, marcas, testimonios, whatsapp, bestRows, favIds] =
-    await Promise.all([
-      getBannersActivos(),
-      prisma.producto.findMany({
-        where: { activo: true, destacado: true },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-        include: incluir,
-      }),
-      prisma.producto.findMany({
-        where: { activo: true, nuevo: true },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-        include: incluir,
-      }),
-      getMarcasTienda(),
-      getTestimoniosActivos(),
-      getConfigValor("whatsapp"),
-      prisma.pedidoItem.groupBy({
-        by: ["productoId"],
-        _sum: { cantidad: true },
-        orderBy: { _sum: { cantidad: "desc" } },
-        take: 8,
-      }),
-      getFavoritoIds(),
-    ]);
+  const [
+    banners,
+    destacados,
+    nuevos,
+    marcas,
+    testimonios,
+    whatsapp,
+    bestRows,
+    favIds,
+    ctaImagen,
+  ] = await Promise.all([
+    getBannersActivos(),
+    prisma.producto.findMany({
+      where: { activo: true, destacado: true },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: incluir,
+    }),
+    prisma.producto.findMany({
+      where: { activo: true, nuevo: true },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: incluir,
+    }),
+    getMarcasTienda(),
+    getTestimoniosActivos(),
+    getConfigValor("whatsapp"),
+    prisma.pedidoItem.groupBy({
+      by: ["productoId"],
+      _sum: { cantidad: true },
+      orderBy: { _sum: { cantidad: "desc" } },
+      take: 8,
+    }),
+    getFavoritoIds(),
+    getConfigValor("cta_home_imagen"),
+  ]);
 
   // Más vendidos (por ventas reales); si faltan, se completa con destacados.
   const bestIds = bestRows.map((r) => r.productoId);
@@ -197,7 +207,7 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <ParallaxBg>
           <Image
-            src="/banners/foto-2.webp"
+            src={ctaImagen ?? "/banners/foto-2.webp"}
             alt=""
             fill
             sizes="100vw"

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getPerfil } from "@/lib/auth";
 import { ConfigForm, type ConfigValues } from "@/components/admin/config-form";
+import { parseRedesExtra } from "@/lib/config";
 
 export const metadata: Metadata = { title: "Configuración" };
 export const dynamic = "force-dynamic";
@@ -33,12 +34,22 @@ export default async function AdminConfiguracion() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Configuración</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+        Configuración
+      </h1>
+      <p className="text-muted-foreground mt-1 text-sm">
         Datos del negocio usados en la tienda y el checkout.
       </p>
       <div className="mt-6">
-        <ConfigForm values={values} logoUrl={str(c.logo_url) || null} />
+        <ConfigForm
+          // Remonta el formulario cuando cambian las redes guardadas para
+          // que la lista local refleje lo último de la BD tras guardar.
+          key={JSON.stringify(c.redes_extra ?? [])}
+          values={values}
+          logoUrl={str(c.logo_url) || null}
+          ctaUrl={str(c.cta_home_imagen) || null}
+          redesExtra={parseRedesExtra(c.redes_extra)}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidarTag } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRoles } from "@/lib/auth";
@@ -91,7 +92,7 @@ export async function guardarBanner(
 
   revalidatePath("/admin/banners");
   revalidatePath("/");
-  revalidateTag("banners", "max");
+  invalidarTag("banners");
   redirect("/admin/banners");
 }
 
@@ -102,7 +103,7 @@ export async function toggleActivoBanner(id: string) {
     await prisma.banner.update({ where: { id }, data: { activo: !b.activo } });
     revalidatePath("/admin/banners");
     revalidatePath("/");
-    revalidateTag("banners", "max");
+    invalidarTag("banners");
   }
 }
 
@@ -111,5 +112,5 @@ export async function eliminarBanner(id: string) {
   await prisma.banner.delete({ where: { id } });
   revalidatePath("/admin/banners");
   revalidatePath("/");
-  revalidateTag("banners", "max");
+  invalidarTag("banners");
 }

@@ -1,5 +1,18 @@
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+
+/**
+ * Invalida un tag de caché sin tumbar la operación si el runtime lo rechaza
+ * (en producción el guardado de configuración devolvía un error de servidor).
+ * Si la invalidación falla, las entradas expiran solas por su `revalidate`.
+ */
+export function invalidarTag(tag: string) {
+  try {
+    revalidateTag(tag, "max");
+  } catch (e) {
+    console.error(`invalidarTag("${tag}") falló:`, e);
+  }
+}
 
 /*
   Lecturas calientes del storefront con caché entre requests (Lighthouse:
