@@ -18,12 +18,19 @@ export default async function EditarCategoria({
   if (!categoria) notFound();
 
   return (
-    <div>
-      <Link href="/admin/categorias" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
+    <div className="mx-auto w-full max-w-lg">
+      <Link
+        href="/admin/categorias"
+        className="text-muted-foreground hover:text-primary inline-flex items-center gap-1 text-sm"
+      >
         <ChevronLeft className="size-4" /> Categorías
       </Link>
-      <h1 className="mt-2 mb-6 font-display text-2xl font-semibold text-foreground sm:text-3xl">Editar categoría</h1>
-      <CategoriaForm categoria={{ id: categoria.id, nombre: categoria.nombre, orden: categoria.orden }} />
+      <h1 className="font-display text-foreground mt-2 mb-6 text-2xl font-semibold sm:text-3xl">
+        Editar categoría
+      </h1>
+      <CategoriaForm
+        categoria={{ id: categoria.id, nombre: categoria.nombre, orden: categoria.orden }}
+      />
     </div>
   );
 }

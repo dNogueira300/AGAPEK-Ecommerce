@@ -24,9 +24,7 @@ export default async function AdminPedidos({
   const { estado } = await searchParams;
   const filtro = estado && ESTADO_ORDEN.includes(estado as never) ? estado : undefined;
 
-  const where: Prisma.PedidoWhereInput = filtro
-    ? { estado: filtro as never }
-    : {};
+  const where: Prisma.PedidoWhereInput = filtro ? { estado: filtro as never } : {};
 
   const pedidos = await prisma.pedido.findMany({
     where,
@@ -37,8 +35,10 @@ export default async function AdminPedidos({
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Pedidos</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{pedidos.length} pedidos.</p>
+      <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+        Pedidos
+      </h1>
+      <p className="text-muted-foreground mt-1 text-sm">{pedidos.length} pedidos.</p>
 
       {/* Filtros por estado */}
       <nav className="mt-5 flex flex-wrap gap-2">
@@ -46,7 +46,9 @@ export default async function AdminPedidos({
           href="/admin/pedidos"
           className={cn(
             "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
-            !filtro ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground/80 hover:bg-secondary",
+            !filtro
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-card text-foreground/80 hover:bg-secondary",
           )}
         >
           Todos
@@ -57,7 +59,9 @@ export default async function AdminPedidos({
             href={`/admin/pedidos?estado=${e}`}
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
-              filtro === e ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground/80 hover:bg-secondary",
+              filtro === e
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground/80 hover:bg-secondary",
             )}
           >
             {ESTADO_LABEL[e]}
@@ -65,9 +69,9 @@ export default async function AdminPedidos({
         ))}
       </nav>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-card">
+      <div className="border-border bg-card mt-6 overflow-x-auto rounded-2xl border">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="border-border text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
             <tr>
               <th className="px-4 py-3 font-medium">Código</th>
               <th className="px-4 py-3 font-medium">Cliente</th>
@@ -76,10 +80,10 @@ export default async function AdminPedidos({
               <th className="px-4 py-3 text-right font-medium">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-border divide-y">
             {pedidos.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={5} className="text-muted-foreground px-4 py-8 text-center">
                   No hay pedidos {filtro ? "con este estado" : ""}.
                 </td>
               </tr>
@@ -87,21 +91,31 @@ export default async function AdminPedidos({
               pedidos.map((p) => (
                 <tr key={p.id} className="hover:bg-secondary/40">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/pedidos/${p.codigo}`} className="font-mono text-xs font-medium text-primary hover:underline">
+                    <Link
+                      href={`/admin/pedidos/${p.codigo}`}
+                      className="text-primary font-mono text-xs font-medium hover:underline"
+                    >
                       {p.codigo}
                     </Link>
-                    <div className="text-xs text-muted-foreground">{formatFecha(p.createdAt, "dd/MM HH:mm")}</div>
+                    <div className="text-muted-foreground text-xs">
+                      {formatFecha(p.createdAt, "dd/MM HH:mm")}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-foreground/80">{p.perfil.nombre}</td>
+                  <td className="text-foreground/80 px-4 py-3">{p.perfil.nombre}</td>
                   <td className="px-4 py-3">
-                    <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", estadoBadge(p.estado))}>
+                    <span
+                      className={cn(
+                        "inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
+                        estadoBadge(p.estado),
+                      )}
+                    >
                       {ESTADO_LABEL[p.estado]}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                  <td className="text-muted-foreground px-4 py-3 text-xs">
                     {ESTADO_PAGO_LABEL[p.estadoPago]}
                   </td>
-                  <td className="px-4 py-3 text-right font-medium text-foreground">
+                  <td className="text-foreground px-4 py-3 text-right font-medium">
                     {soles(Number(p.total))}
                   </td>
                 </tr>

@@ -24,7 +24,7 @@ export function CategoriaForm({ categoria }: { categoria?: CategoriaEdit }) {
   );
 
   return (
-    <form action={formAction} className="max-w-lg space-y-5 rounded-2xl border border-border bg-card p-6">
+    <form action={formAction} className="space-y-5 rounded-2xl border border-border bg-card p-6">
       {categoria && <input type="hidden" name="id" value={categoria.id} />}
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground" htmlFor="nombre">Nombre</label>

@@ -96,7 +96,7 @@ export function RutinaForm({
     });
 
   return (
-    <form action={formAction} className="max-w-3xl space-y-6">
+    <form action={formAction} className="space-y-6">
       {rutina && <input type="hidden" name="id" value={rutina.id} />}
       <input type="hidden" name="pasos" value={JSON.stringify(pasos)} />
 

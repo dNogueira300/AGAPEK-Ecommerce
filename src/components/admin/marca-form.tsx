@@ -24,7 +24,7 @@ export function MarcaForm({ marca }: { marca?: MarcaEdit }) {
   const [preview, setPreview] = useState<string | null>(marca?.logoUrl ?? null);
 
   return (
-    <form action={formAction} className="max-w-lg space-y-5 rounded-2xl border border-border bg-card p-6">
+    <form action={formAction} className="space-y-5 rounded-2xl border border-border bg-card p-6">
       {marca && <input type="hidden" name="id" value={marca.id} />}
 
       <div className="flex items-center gap-4">

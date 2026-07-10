@@ -24,7 +24,7 @@ export function TestimonioForm({ testimonio }: { testimonio?: TestimonioEdit }) 
   );
 
   return (
-    <form action={formAction} className="max-w-lg space-y-5 rounded-2xl border border-border bg-card p-6">
+    <form action={formAction} className="space-y-5 rounded-2xl border border-border bg-card p-6">
       {testimonio && <input type="hidden" name="id" value={testimonio.id} />}
       <div className="space-y-1.5">
         <label className={label} htmlFor="nombre">Nombre del cliente</label>

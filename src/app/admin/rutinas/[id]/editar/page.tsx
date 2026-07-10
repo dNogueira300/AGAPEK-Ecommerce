@@ -33,13 +33,22 @@ export default async function EditarRutina({
   if (!rutina) notFound();
 
   return (
-    <div>
-      <Link href="/admin/rutinas" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
+    <div className="mx-auto w-full max-w-3xl">
+      <Link
+        href="/admin/rutinas"
+        className="text-muted-foreground hover:text-primary inline-flex items-center gap-1 text-sm"
+      >
         <ChevronLeft className="size-4" /> Rutinas
       </Link>
-      <h1 className="mt-2 mb-6 font-display text-2xl font-semibold text-foreground sm:text-3xl">Editar rutina</h1>
+      <h1 className="font-display text-foreground mt-2 mb-6 text-2xl font-semibold sm:text-3xl">
+        Editar rutina
+      </h1>
       <RutinaForm
-        productos={productos.map((p) => ({ id: p.id, nombre: p.nombre, marca: p.marca.nombre }))}
+        productos={productos.map((p) => ({
+          id: p.id,
+          nombre: p.nombre,
+          marca: p.marca.nombre,
+        }))}
         rutina={{
           id: rutina.id,
           titulo: rutina.titulo,

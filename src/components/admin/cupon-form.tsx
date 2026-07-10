@@ -32,7 +32,7 @@ export function CuponForm({ cupon }: { cupon?: CuponEdit }) {
   );
 
   return (
-    <form action={formAction} className="max-w-2xl space-y-6">
+    <form action={formAction} className="space-y-6">
       {cupon && <input type="hidden" name="id" value={cupon.id} />}
 
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">

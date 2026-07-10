@@ -5,11 +5,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const data = await getPerfil();
   if (!data) redirect("/login?redirect=/admin");
   if (!ROLES_ADMIN.includes(data.perfil.rol)) redirect("/");
@@ -20,7 +16,7 @@ export default async function AdminLayout({
     : 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background lg:flex-row">
+    <div className="bg-background flex min-h-screen flex-col lg:flex-row">
       <AdminSidebar
         rol={data.perfil.rol}
         nombre={data.perfil.nombre}

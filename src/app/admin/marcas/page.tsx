@@ -18,17 +18,22 @@ export default async function AdminMarcas() {
     <div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Marcas</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{marcas.length} marcas.</p>
+          <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+            Marcas
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">{marcas.length} marcas.</p>
         </div>
-        <Link href="/admin/marcas/nuevo" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5">
+        <Link
+          href="/admin/marcas/nuevo"
+          className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
+        >
           <Plus className="size-4" /> Nueva marca
         </Link>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-card">
+      <div className="border-border bg-card mt-6 overflow-x-auto rounded-2xl border">
         <table className="w-full min-w-[560px] text-sm">
-          <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="border-border text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
             <tr>
               <th className="px-4 py-3 font-medium">Marca</th>
               <th className="px-4 py-3 font-medium">Aliada</th>
@@ -36,33 +41,45 @@ export default async function AdminMarcas() {
               <th className="px-4 py-3 text-right font-medium">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-border divide-y">
             {marcas.map((m) => (
               <tr key={m.id} className="hover:bg-secondary/40">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-secondary">
+                    <span className="border-border bg-secondary flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
                       {m.logoUrl ? (
-                        <Image src={m.logoUrl} alt={m.nombre} width={40} height={40} className="object-contain p-1" />
+                        <Image
+                          src={m.logoUrl}
+                          alt={m.nombre}
+                          width={40}
+                          height={40}
+                          className="object-contain p-1"
+                        />
                       ) : (
-                        <Store className="size-4 text-muted-foreground" />
+                        <Store className="text-muted-foreground size-4" />
                       )}
                     </span>
                     <div>
-                      <p className="font-medium text-foreground">{m.nombre}</p>
-                      <p className="text-xs text-muted-foreground">/{m.slug}</p>
+                      <p className="text-foreground font-medium">{m.nombre}</p>
+                      <p className="text-muted-foreground text-xs">/{m.slug}</p>
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${m.aliada ? "bg-chart-5/15 text-[color:var(--chart-5)]" : "bg-secondary text-muted-foreground"}`}>
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${m.aliada ? "bg-chart-5/15 text-[color:var(--chart-5)]" : "bg-secondary text-muted-foreground"}`}
+                  >
                     {m.aliada ? "Sí" : "No"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-foreground/80">{m._count.productos}</td>
+                <td className="text-foreground/80 px-4 py-3">{m._count.productos}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1">
-                    <Link href={`/admin/marcas/${m.id}/editar`} aria-label="Editar" className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-secondary hover:text-foreground">
+                    <Link
+                      href={`/admin/marcas/${m.id}/editar`}
+                      aria-label="Editar"
+                      className="text-foreground/70 hover:bg-secondary hover:text-foreground inline-flex size-9 items-center justify-center rounded-lg"
+                    >
                       <Pencil className="size-4" />
                     </Link>
                     <form action={eliminarMarca.bind(null, m.id)}>
@@ -70,8 +87,12 @@ export default async function AdminMarcas() {
                         type="submit"
                         disabled={m._count.productos > 0}
                         aria-label="Eliminar"
-                        title={m._count.productos > 0 ? "Tiene productos asociados" : "Eliminar"}
-                        className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-30"
+                        title={
+                          m._count.productos > 0
+                            ? "Tiene productos asociados"
+                            : "Eliminar"
+                        }
+                        className="text-foreground/70 hover:bg-destructive/10 hover:text-destructive inline-flex size-9 items-center justify-center rounded-lg disabled:cursor-not-allowed disabled:opacity-30"
                       >
                         <Trash2 className="size-4" />
                       </button>

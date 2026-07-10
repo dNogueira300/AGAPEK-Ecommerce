@@ -24,30 +24,36 @@ export default async function AdminUsuarios() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Usuarios</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+        Usuarios
+      </h1>
+      <p className="text-muted-foreground mt-1 text-sm">
         Gestiona los roles. Un administrador puede dar acceso al panel a otras personas.
       </p>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-card">
+      <div className="border-border bg-card mt-6 overflow-x-auto rounded-2xl border">
         <table className="w-full min-w-[560px] text-sm">
-          <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="border-border text-muted-foreground border-b text-left text-xs tracking-wide uppercase">
             <tr>
               <th className="px-4 py-3 font-medium">Usuario</th>
               <th className="px-4 py-3 font-medium">Correo</th>
               <th className="px-4 py-3 font-medium">Rol</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-border divide-y">
             {perfiles.map((p) => (
               <tr key={p.id} className="hover:bg-secondary/40">
                 <td className="px-4 py-3">
-                  <span className="font-medium text-foreground">{p.nombre}</span>
+                  <span className="text-foreground font-medium">{p.nombre}</span>
                   {p.id === yo.perfil.id && (
-                    <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">tú</span>
+                    <span className="bg-secondary text-muted-foreground ml-2 rounded-full px-2 py-0.5 text-[11px]">
+                      tú
+                    </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{emails.get(p.id) ?? "—"}</td>
+                <td className="text-muted-foreground px-4 py-3">
+                  {emails.get(p.id) ?? "—"}
+                </td>
                 <td className="px-4 py-3">
                   <RolSelect id={p.id} rol={p.rol} disabled={p.id === yo.perfil.id} />
                 </td>
@@ -57,8 +63,9 @@ export default async function AdminUsuarios() {
         </table>
       </div>
 
-      <p className="mt-4 text-xs text-muted-foreground">
-        Para crear una cuenta nueva, la persona debe registrarse en la tienda y luego asignarle un rol aquí.
+      <p className="text-muted-foreground mt-4 text-xs">
+        Para crear una cuenta nueva, la persona debe registrarse en la tienda y luego
+        asignarle un rol aquí.
       </p>
     </div>
   );
