@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/tienda/site-header";
 import { SiteFooter } from "@/components/tienda/site-footer";
 import { SmoothScroll } from "@/components/tienda/smooth-scroll";
+import { Watermark } from "@/components/tienda/watermark";
 import { getSesionUI } from "@/lib/auth";
 import { getRedesSociales, getLogoUrl } from "@/lib/config";
 
@@ -53,6 +54,7 @@ export default async function RootLayout({
           shadow="0 0 8px rgba(230, 93, 153, 0.5)"
         />
         <SmoothScroll />
+        <Watermark />
         <SiteHeader sesion={sesion} logoUrl={logoUrl} />
         <main className="flex-1">{children}</main>
         <SiteFooter redes={redes} logoUrl={logoUrl} />

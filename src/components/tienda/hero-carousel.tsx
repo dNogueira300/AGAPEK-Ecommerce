@@ -48,7 +48,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
     <section
       aria-roledescription="carrusel"
       aria-label="Promociones AGAPEK"
-      className="group relative h-[560px] w-full overflow-hidden sm:h-[600px]"
+      className="group relative h-[calc(100svh-4rem)] min-h-[560px] w-full overflow-hidden"
       onMouseEnter={stop}
       onMouseLeave={start}
     >
