@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronRight, LogOut, Mail, Package, ShoppingBag, User } from "lucide-react";
+import {
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  ShoppingBag,
+} from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getPerfil } from "@/lib/auth";
+import { getPerfil, ROLES_ADMIN } from "@/lib/auth";
 import { signOutAction } from "@/lib/auth-actions";
 import { formatFecha } from "@/lib/date";
 import { ESTADO_LABEL, estadoBadge } from "@/lib/pedido-labels";
 import { ReordenarButton } from "@/components/tienda/reordenar-button";
+import { PerfilDatosCard } from "@/components/tienda/perfil-datos";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 export const dynamic = "force-dynamic";
@@ -28,71 +35,64 @@ export default async function PerfilPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
+      <h1 className="font-display text-foreground text-3xl font-semibold tracking-tight">
         Mi perfil
       </h1>
 
-      <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-center gap-4">
-          <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-primary">
-            <User className="size-7" />
+      {ROLES_ADMIN.includes(perfil.rol) && (
+        <Link
+          href="/admin"
+          className="border-primary/25 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 mt-6 flex items-center gap-4 rounded-2xl border p-5 transition-colors"
+        >
+          <span className="bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-full shadow-sm">
+            <LayoutDashboard className="size-5" />
           </span>
-          <div>
-            <p className="font-display text-lg font-semibold text-foreground">
-              {perfil.nombre}
-            </p>
-            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Mail className="size-3.5" />
-              {email}
-            </p>
-          </div>
-        </div>
+          <span className="min-w-0 flex-1">
+            <span className="text-foreground block text-sm font-semibold">
+              Ir al panel administrativo
+            </span>
+            <span className="text-muted-foreground block text-xs">
+              Gestiona productos, pedidos y configuración de la tienda.
+            </span>
+          </span>
+          <ChevronRight className="text-primary size-5 shrink-0" />
+        </Link>
+      )}
 
-        <dl className="mt-6 grid gap-4 border-t border-border pt-6 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Celular
-            </dt>
-            <dd className="mt-1 text-sm text-foreground">
-              {perfil.celular ?? "No registrado"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              DNI
-            </dt>
-            <dd className="mt-1 text-sm text-foreground">
-              {perfil.dni ?? "No registrado"}
-            </dd>
-          </div>
-        </dl>
-      </div>
+      <PerfilDatosCard
+        datos={{
+          nombre: perfil.nombre,
+          email,
+          celular: perfil.celular,
+          dni: perfil.dni,
+        }}
+      />
 
       {/* Mis pedidos */}
       <section className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-2 font-display text-xl font-semibold text-foreground">
-            <ShoppingBag className="size-5 text-primary" />
+          <h2 className="font-display text-foreground flex items-center gap-2 text-xl font-semibold">
+            <ShoppingBag className="text-primary size-5" />
             Mis pedidos
           </h2>
           {pedidos.length > 0 && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               {pedidos.length} {pedidos.length === 1 ? "pedido" : "pedidos"}
             </span>
           )}
         </div>
 
         {pedidos.length === 0 ? (
-          <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/30 px-6 py-12 text-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-background text-primary shadow-sm">
+          <div className="border-border bg-secondary/30 mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-12 text-center">
+            <span className="bg-background text-primary flex size-12 items-center justify-center rounded-full shadow-sm">
               <Package className="size-6" />
             </span>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               Todavía no realizas ningún pedido.
             </p>
             <Link
               href="/catalogo"
-              className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
+              className="bg-primary text-primary-foreground mt-4 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
             >
               Ir al catálogo
             </Link>
@@ -101,16 +101,18 @@ export default async function PerfilPage() {
           <ul className="mt-4 space-y-3">
             {pedidos.map((p) => {
               const nItems = p.items.reduce((n, i) => n + i.cantidad, 0);
-              const resumen = p.items.map((i) => `${i.cantidad}× ${i.nombreProducto}`).join(" · ");
+              const resumen = p.items
+                .map((i) => `${i.cantidad}× ${i.nombreProducto}`)
+                .join(" · ");
               return (
                 <li
                   key={p.id}
-                  className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
+                  className="border-border bg-card hover:border-primary/30 rounded-2xl border p-5 transition-colors"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-sm font-semibold text-foreground">
+                        <span className="text-foreground font-mono text-sm font-semibold">
                           {p.codigo}
                         </span>
                         <span
@@ -119,20 +121,25 @@ export default async function PerfilPage() {
                           {ESTADO_LABEL[p.estado] ?? p.estado}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {formatFecha(p.createdAt)} · {nItems} {nItems === 1 ? "artículo" : "artículos"}
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        {formatFecha(p.createdAt)} · {nItems}{" "}
+                        {nItems === 1 ? "artículo" : "artículos"}
                       </p>
-                      <p className="mt-1.5 line-clamp-1 text-sm text-foreground/75">{resumen}</p>
+                      <p className="text-foreground/75 mt-1.5 line-clamp-1 text-sm">
+                        {resumen}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-foreground">{soles(Number(p.total))}</p>
+                      <p className="text-foreground font-semibold">
+                        {soles(Number(p.total))}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+                  <div className="border-border mt-4 flex items-center justify-between gap-3 border-t pt-3">
                     <Link
                       href={`/pedido/${p.codigo}`}
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                      className="text-primary inline-flex items-center gap-1 text-sm font-semibold hover:underline"
                     >
                       Ver detalle y seguimiento
                       <ChevronRight className="size-4" />
@@ -149,7 +156,7 @@ export default async function PerfilPage() {
       <form action={signOutAction} className="mt-10">
         <button
           type="submit"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+          className="border-border bg-card text-foreground hover:bg-secondary inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors"
         >
           <LogOut className="size-4" />
           Cerrar sesión
