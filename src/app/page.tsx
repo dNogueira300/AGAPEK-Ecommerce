@@ -7,6 +7,12 @@ import { toProductCard } from "@/lib/product-card";
 import { getFavoritoIds } from "@/lib/favorito-actions";
 import { BrandMarquee } from "@/components/tienda/brand-marquee";
 import { HeroCarousel } from "@/components/tienda/hero-carousel";
+import {
+  getBannersActivos,
+  getConfigValor,
+  getMarcasTienda,
+  getTestimoniosActivos,
+} from "@/lib/cache";
 import { ParallaxBg, Reveal, Stagger, StaggerItem } from "@/components/tienda/motion";
 
 export const dynamic = "force-dynamic";
@@ -34,9 +40,9 @@ export default async function HomePage() {
     marca: true,
     imagenes: { orderBy: { orden: "asc" as const }, take: 1 },
   };
-  const [banners, destacados, nuevos, marcas, testimonios, cfg, bestRows] =
+  const [banners, destacados, nuevos, marcas, testimonios, whatsapp, bestRows, favIds] =
     await Promise.all([
-      prisma.banner.findMany({ where: { activo: true }, orderBy: { orden: "asc" } }),
+      getBannersActivos(),
       prisma.producto.findMany({
         where: { activo: true, destacado: true },
         orderBy: { createdAt: "desc" },
@@ -49,17 +55,17 @@ export default async function HomePage() {
         take: 8,
         include: incluir,
       }),
-      prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
-      prisma.testimonio.findMany({ where: { activo: true }, take: 6 }),
-      prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
+      getMarcasTienda(),
+      getTestimoniosActivos(),
+      getConfigValor("whatsapp"),
       prisma.pedidoItem.groupBy({
         by: ["productoId"],
         _sum: { cantidad: true },
         orderBy: { _sum: { cantidad: "desc" } },
         take: 8,
       }),
+      getFavoritoIds(),
     ]);
-  const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
 
   // Más vendidos (por ventas reales); si faltan, se completa con destacados.
   const bestIds = bestRows.map((r) => r.productoId);
@@ -78,7 +84,6 @@ export default async function HomePage() {
     masVendidosProd = [...masVendidosProd, ...extra].slice(0, 8);
   }
 
-  const favIds = await getFavoritoIds();
   const masVendidos = masVendidosProd.map((p) =>
     toProductCard(p, whatsapp, favIds.has(p.id)),
   );
@@ -196,6 +201,7 @@ export default async function HomePage() {
             alt=""
             fill
             sizes="100vw"
+            quality={65}
             className="object-cover"
           />
         </ParallaxBg>

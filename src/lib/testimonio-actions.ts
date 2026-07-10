@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRoles } from "@/lib/auth";
@@ -42,16 +42,21 @@ export async function guardarTestimonio(
 
   revalidatePath("/admin/testimonios");
   revalidatePath("/");
+  revalidateTag("testimonios", "max");
   redirect("/admin/testimonios");
 }
 
 export async function toggleActivoTestimonio(id: string) {
   await requireContenido();
-  const t = await prisma.testimonio.findUnique({ where: { id }, select: { activo: true } });
+  const t = await prisma.testimonio.findUnique({
+    where: { id },
+    select: { activo: true },
+  });
   if (t) {
     await prisma.testimonio.update({ where: { id }, data: { activo: !t.activo } });
     revalidatePath("/admin/testimonios");
     revalidatePath("/");
+    revalidateTag("testimonios", "max");
   }
 }
 
@@ -60,4 +65,5 @@ export async function eliminarTestimonio(id: string) {
   await prisma.testimonio.delete({ where: { id } });
   revalidatePath("/admin/testimonios");
   revalidatePath("/");
+  revalidateTag("testimonios", "max");
 }

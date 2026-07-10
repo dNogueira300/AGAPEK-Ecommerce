@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, Leaf, MessageCircle, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getConfigValor } from "@/lib/cache";
 import { urlWhatsApp } from "@/lib/whatsapp";
 import { AddToCartFull } from "@/components/tienda/add-to-cart-button";
 import { FavoriteWideButton } from "@/components/tienda/favorite-button";
@@ -25,8 +26,7 @@ async function getProducto(slug: string) {
 }
 
 async function getWhatsapp(): Promise<string | null> {
-  const c = await prisma.configuracion.findUnique({ where: { clave: "whatsapp" } });
-  return typeof c?.valor === "string" ? c.valor : null;
+  return getConfigValor("whatsapp");
 }
 
 export async function generateMetadata({
@@ -74,18 +74,18 @@ export default async function ProductoPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <nav className="text-muted-foreground flex items-center gap-1.5 text-sm">
         <Link href="/catalogo" className="hover:text-primary">
           Catálogo
         </Link>
         <ChevronRight className="size-3.5" />
-        <span className="truncate text-foreground">{producto.nombre}</span>
+        <span className="text-foreground truncate">{producto.nombre}</span>
       </nav>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
         {/* Galería */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="relative aspect-square overflow-hidden rounded-3xl border border-border bg-secondary">
+          <div className="border-border bg-secondary relative aspect-square overflow-hidden rounded-3xl border">
             <Image
               src={imagen}
               alt={producto.imagenes[0]?.alt ?? producto.nombre}
@@ -96,7 +96,7 @@ export default async function ProductoPage({
               className="object-cover"
             />
             {producto.nuevo && (
-              <span className="absolute left-4 top-4 rounded-full bg-card/90 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+              <span className="bg-card/90 text-foreground absolute top-4 left-4 rounded-full px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur">
                 Nuevo
               </span>
             )}
@@ -105,28 +105,30 @@ export default async function ProductoPage({
 
         {/* Info */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             {producto.marca.nombre}
           </p>
-          <h1 className="mt-1.5 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <h1 className="font-display text-foreground mt-1.5 text-3xl font-semibold tracking-tight sm:text-4xl">
             {producto.nombre}
           </h1>
 
           <div className="mt-3 flex items-center gap-3">
-            <span className="flex items-center gap-1 text-sm font-medium text-foreground">
-              <Star className="size-4 fill-primary text-primary" />
+            <span className="text-foreground flex items-center gap-1 text-sm font-medium">
+              <Star className="fill-primary text-primary size-4" />
               5.0
             </span>
-            <span className="text-sm text-muted-foreground">· {producto.categoria.nombre}</span>
+            <span className="text-muted-foreground text-sm">
+              · {producto.categoria.nombre}
+            </span>
           </div>
 
           {/* Precio */}
           <div className="mt-5 flex items-end gap-3">
-            <span className="text-3xl font-semibold text-foreground">
+            <span className="text-foreground text-3xl font-semibold">
               {soles(enOferta ? precioOferta! : precio)}
             </span>
             {enOferta && (
-              <span className="pb-1 text-lg text-muted-foreground line-through">
+              <span className="text-muted-foreground pb-1 text-lg line-through">
                 {soles(precio)}
               </span>
             )}
@@ -135,18 +137,18 @@ export default async function ProductoPage({
           {/* Stock */}
           <div className="mt-2">
             {agotado ? (
-              <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
+              <span className="bg-secondary text-muted-foreground inline-flex items-center rounded-full px-3 py-1 text-xs font-medium">
                 Agotado
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-full bg-chart-5/15 px-3 py-1 text-xs font-medium text-[color:var(--chart-5)]">
+              <span className="bg-chart-5/15 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-[color:var(--chart-5)]">
                 En stock · {producto.stock} disponibles
               </span>
             )}
           </div>
 
           {producto.descripcionCorta && (
-            <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+            <p className="text-muted-foreground mt-5 text-sm leading-relaxed">
               {producto.descripcionCorta}
             </p>
           )}
@@ -157,16 +159,16 @@ export default async function ProductoPage({
               {producto.necesidad.map((x) => (
                 <span
                   key={`n-${x}`}
-                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium capitalize text-foreground/80"
+                  className="border-border bg-card text-foreground/80 inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium capitalize"
                 >
-                  <Leaf className="size-3 text-primary" />
+                  <Leaf className="text-primary size-3" />
                   {x}
                 </span>
               ))}
               {producto.tipoPiel.map((x) => (
                 <span
                   key={`t-${x}`}
-                  className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium capitalize text-secondary-foreground"
+                  className="bg-secondary text-secondary-foreground inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize"
                 >
                   Piel {x}
                 </span>
@@ -182,9 +184,9 @@ export default async function ProductoPage({
                   href={waUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+                  className="border-border bg-card text-foreground hover:bg-secondary inline-flex items-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold transition-colors"
                 >
-                  <MessageCircle className="size-4.5 text-primary" />
+                  <MessageCircle className="text-primary size-4.5" />
                   Consultar por WhatsApp
                 </a>
               )
@@ -209,23 +211,23 @@ export default async function ProductoPage({
 
           {/* Detalle largo */}
           {(producto.descripcion || producto.modoUso) && (
-            <div className="mt-8 space-y-6 border-t border-border pt-6">
+            <div className="border-border mt-8 space-y-6 border-t pt-6">
               {producto.descripcion && (
                 <section>
-                  <h2 className="font-display text-lg font-semibold text-foreground">
+                  <h2 className="font-display text-foreground text-lg font-semibold">
                     Descripción
                   </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
                     {producto.descripcion}
                   </p>
                 </section>
               )}
               {producto.modoUso && (
                 <section>
-                  <h2 className="font-display text-lg font-semibold text-foreground">
+                  <h2 className="font-display text-foreground text-lg font-semibold">
                     Modo de uso
                   </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
                     {producto.modoUso}
                   </p>
                 </section>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Heart } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getConfigValor } from "@/lib/cache";
 import { getPerfil } from "@/lib/auth";
 import { ProductCard } from "@/components/tienda/product-card";
 import { toProductCard } from "@/lib/product-card";
@@ -14,25 +15,26 @@ export default async function FavoritosPage() {
   const data = await getPerfil();
   if (!data) redirect("/login?redirect=/favoritos");
 
-  const [productos, cfg] = await Promise.all([
+  const [productos, whatsapp] = await Promise.all([
     prisma.producto.findMany({
       where: { activo: true, favoritoDe: { some: { id: data.perfil.id } } },
       orderBy: { createdAt: "desc" },
       include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
     }),
-    prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
+    getConfigValor("whatsapp"),
   ]);
-  const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
   const cards = productos.map((p) => toProductCard(p, whatsapp, true));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <header className="border-b border-border pb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tu selección</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+      <header className="border-border border-b pb-6">
+        <p className="text-primary text-xs font-semibold tracking-[0.2em] uppercase">
+          Tu selección
+        </p>
+        <h1 className="font-display text-foreground mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
           Mis favoritos
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           {cards.length > 0
             ? `${cards.length} ${cards.length === 1 ? "producto guardado" : "productos guardados"}.`
             : "Aún no has guardado productos."}
@@ -46,19 +48,20 @@ export default async function FavoritosPage() {
           ))}
         </div>
       ) : (
-        <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-secondary/30 px-6 py-16 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-background text-primary shadow-sm">
+        <div className="border-border bg-secondary/30 mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-16 text-center">
+          <span className="bg-background text-primary flex size-14 items-center justify-center rounded-full shadow-sm">
             <Heart className="size-7" />
           </span>
-          <h2 className="mt-4 font-display text-lg font-semibold text-foreground">
+          <h2 className="font-display text-foreground mt-4 text-lg font-semibold">
             Tu lista está vacía
           </h2>
-          <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
-            Toca el corazón en cualquier producto para guardarlo aquí y encontrarlo fácilmente.
+          <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">
+            Toca el corazón en cualquier producto para guardarlo aquí y encontrarlo
+            fácilmente.
           </p>
           <Link
             href="/catalogo"
-            className="mt-5 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
+            className="bg-primary text-primary-foreground mt-5 inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
           >
             Explorar catálogo
           </Link>

@@ -7,6 +7,7 @@ import { getFavoritoIds } from "@/lib/favorito-actions";
 import { CatalogSidebar } from "@/components/tienda/catalog-sidebar";
 import { CatalogSort } from "@/components/tienda/catalog-sort";
 import { Stagger, StaggerItem } from "@/components/tienda/motion";
+import { getCategoriasTienda, getConfigValor, getMarcasTienda } from "@/lib/cache";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -48,12 +49,11 @@ export default async function CatalogoPage({
   const min = sp.min ? Number(sp.min) : undefined;
   const max = sp.max ? Number(sp.max) : undefined;
 
-  const [categorias, marcas, cfg] = await Promise.all([
-    prisma.categoria.findMany({ orderBy: { orden: "asc" } }),
-    prisma.marca.findMany({ orderBy: { nombre: "asc" } }),
-    prisma.configuracion.findUnique({ where: { clave: "whatsapp" } }),
+  const [categorias, marcas, whatsapp] = await Promise.all([
+    getCategoriasTienda(),
+    getMarcasTienda(),
+    getConfigValor("whatsapp"),
   ]);
-  const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
 
   const precioFilter: Prisma.DecimalFilter | undefined =
     min !== undefined || max !== undefined
@@ -81,12 +81,14 @@ export default async function CatalogoPage({
       : {}),
   };
 
-  const productos = await prisma.producto.findMany({
-    where,
-    orderBy: ORDEN[sort] ?? ORDEN.relevancia,
-    include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
-  });
-  const favIds = await getFavoritoIds();
+  const [productos, favIds] = await Promise.all([
+    prisma.producto.findMany({
+      where,
+      orderBy: ORDEN[sort] ?? ORDEN.relevancia,
+      include: { marca: true, imagenes: { orderBy: { orden: "asc" }, take: 1 } },
+    }),
+    getFavoritoIds(),
+  ]);
   const cards = productos.map((p) => toProductCard(p, whatsapp, favIds.has(p.id)));
 
   return (

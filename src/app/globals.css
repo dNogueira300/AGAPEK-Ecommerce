@@ -4,8 +4,15 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  AGAPEK — tokens de diseño (extraídos de la referencia kbeauty-two.vercel.app).
-  Estética pastel boutique: rosa de marca #e65d99 sobre fondo blanco azulado.
+  AGAPEK — tokens de diseño (base: referencia kbeauty-two.vercel.app).
+  Estética pastel boutique: rosa de marca sobre fondo blanco azulado.
+
+  Ajuste AA (auditoría Lighthouse 2026-07-09): el rosa interactivo pasó de
+  #e65d99 (3.2:1 con texto blanco) a #c23c7c (4.8:1); el verde de éxito de
+  #57bc8a (2.3:1) a #187a4e (5.3:1); y muted-foreground de #6d7277 a #5f646a
+  para superar 4.5:1 también sobre superficies tintadas (--secondary).
+  El rosa original #e65d99 sigue disponible en --brand para usos decorativos
+  (degradados, iconos grandes) donde no hay texto encima.
 */
 :root {
   --radius: 0.75rem;
@@ -18,14 +25,15 @@
   --popover: #ffffff;
   --popover-foreground: #080c0f;
 
-  --primary: #e65d99;
+  --brand: #e65d99;
+  --primary: #c23c7c;
   --primary-foreground: #fffafc;
 
   --secondary: #ecf3f8;
   --secondary-foreground: #080c0f;
 
   --muted: #ecf3f8;
-  --muted-foreground: #6d7277;
+  --muted-foreground: #5f646a;
 
   --accent: #ecf3f8;
   --accent-foreground: #080c0f;
@@ -35,22 +43,22 @@
 
   --border: #d8dfe4;
   --input: #d8dfe4;
-  --ring: #e65d99;
+  --ring: #c23c7c;
 
   --chart-1: #e65d99;
   --chart-2: #c14d87;
   --chart-3: #7e6f7e;
   --chart-4: #f5dde7;
-  --chart-5: #57bc8a;
+  --chart-5: #187a4e;
 
   --sidebar: #ffffff;
   --sidebar-foreground: #080c0f;
-  --sidebar-primary: #e65d99;
+  --sidebar-primary: #c23c7c;
   --sidebar-primary-foreground: #fffafc;
   --sidebar-accent: #ecf3f8;
   --sidebar-accent-foreground: #080c0f;
   --sidebar-border: #d8dfe4;
-  --sidebar-ring: #e65d99;
+  --sidebar-ring: #c23c7c;
 }
 
 .dark {
@@ -98,6 +106,7 @@
 }
 
 @theme inline {
+  --color-brand: var(--brand);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

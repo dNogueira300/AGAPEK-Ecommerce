@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CheckCircle2, Clock, MessageCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getConfigValor } from "@/lib/cache";
 import { formatFecha } from "@/lib/date";
 import { construirMensajePedido, urlWhatsApp } from "@/lib/whatsapp";
 import { ComprobanteUpload } from "@/components/tienda/comprobante-upload";
@@ -51,8 +52,7 @@ export default async function PedidoPage({
   });
   if (!pedido) notFound();
 
-  const cfg = await prisma.configuracion.findUnique({ where: { clave: "whatsapp" } });
-  const whatsapp = typeof cfg?.valor === "string" ? cfg.valor : null;
+  const whatsapp = await getConfigValor("whatsapp");
 
   const waUrl = whatsapp
     ? urlWhatsApp(
@@ -79,22 +79,20 @@ export default async function PedidoPage({
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Encabezado */}
-      <div className="rounded-2xl border border-border bg-card p-6 text-center">
+      <div className="border-border bg-card rounded-2xl border p-6 text-center">
         <span
           className={`mx-auto flex size-14 items-center justify-center rounded-full ${cancelado ? "bg-destructive/10 text-destructive" : "bg-chart-5/15 text-[color:var(--chart-5)]"}`}
         >
           <CheckCircle2 className="size-7" />
         </span>
-        <h1 className="mt-4 font-display text-2xl font-semibold text-foreground">
+        <h1 className="font-display text-foreground mt-4 text-2xl font-semibold">
           {cancelado ? "Pedido cancelado" : "¡Pedido registrado!"}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Tu código de seguimiento es
-        </p>
-        <p className="mt-1 font-mono text-lg font-semibold tracking-wide text-primary">
+        <p className="text-muted-foreground mt-1 text-sm">Tu código de seguimiento es</p>
+        <p className="text-primary mt-1 font-mono text-lg font-semibold tracking-wide">
           {pedido.codigo}
         </p>
-        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm font-medium text-foreground">
+        <span className="bg-secondary text-foreground mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium">
           <Clock className="size-3.5" />
           {ESTADO_LABEL[pedido.estado] ?? pedido.estado}
         </span>
@@ -105,12 +103,12 @@ export default async function PedidoPage({
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
+              className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
             >
               <MessageCircle className="size-4.5" />
               Enviar pedido por WhatsApp
             </a>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-xs">
               Envíanos el resumen para confirmar y coordinar la entrega.
             </p>
           </div>
@@ -119,8 +117,8 @@ export default async function PedidoPage({
 
       {/* Comprobante */}
       {requiereComprobante && !cancelado && (
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-lg font-semibold text-foreground">
+        <div className="border-border bg-card mt-6 rounded-2xl border p-6">
+          <h2 className="font-display text-foreground text-lg font-semibold">
             Comprobante de pago
           </h2>
           {pedido.comprobanteUrl ? (
@@ -130,8 +128,9 @@ export default async function PedidoPage({
             </p>
           ) : (
             <>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Sube tu comprobante ({PAGO_LABEL[pedido.metodoPago]}) para agilizar la validación.
+              <p className="text-muted-foreground mt-1 text-sm">
+                Sube tu comprobante ({PAGO_LABEL[pedido.metodoPago]}) para agilizar la
+                validación.
               </p>
               <ComprobanteUpload codigo={pedido.codigo} />
             </>
@@ -140,24 +139,26 @@ export default async function PedidoPage({
       )}
 
       {/* Resumen */}
-      <div className="mt-6 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-display text-lg font-semibold text-foreground">Resumen</h2>
+      <div className="border-border bg-card mt-6 rounded-2xl border p-6">
+        <h2 className="font-display text-foreground text-lg font-semibold">Resumen</h2>
         <ul className="mt-4 space-y-3">
           {pedido.items.map((it) => (
             <li key={it.id} className="flex justify-between gap-3 text-sm">
               <span className="text-foreground/80">
                 {it.cantidad}× {it.nombreProducto}
               </span>
-              <span className="shrink-0 font-medium text-foreground">
+              <span className="text-foreground shrink-0 font-medium">
                 {soles(Number(it.precioUnitario) * it.cantidad)}
               </span>
             </li>
           ))}
         </ul>
-        <dl className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
+        <dl className="border-border mt-4 space-y-2 border-t pt-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Subtotal</dt>
-            <dd className="font-medium text-foreground">{soles(Number(pedido.subtotal))}</dd>
+            <dd className="text-foreground font-medium">
+              {soles(Number(pedido.subtotal))}
+            </dd>
           </div>
           {Number(pedido.descuento) > 0 && (
             <div className="flex justify-between text-[color:var(--chart-5)]">
@@ -167,33 +168,40 @@ export default async function PedidoPage({
           )}
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Envío</dt>
-            <dd className="font-medium text-foreground">{soles(Number(pedido.costoEnvio))}</dd>
+            <dd className="text-foreground font-medium">
+              {soles(Number(pedido.costoEnvio))}
+            </dd>
           </div>
-          <div className="flex justify-between border-t border-border pt-2">
-            <dt className="font-semibold text-foreground">Total</dt>
-            <dd className="font-semibold text-foreground">{soles(Number(pedido.total))}</dd>
+          <div className="border-border flex justify-between border-t pt-2">
+            <dt className="text-foreground font-semibold">Total</dt>
+            <dd className="text-foreground font-semibold">
+              {soles(Number(pedido.total))}
+            </dd>
           </div>
         </dl>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Entrega: {ENTREGA_LABEL[pedido.metodoEntrega]} · Pago: {PAGO_LABEL[pedido.metodoPago]}
+        <p className="text-muted-foreground mt-4 text-sm">
+          Entrega: {ENTREGA_LABEL[pedido.metodoEntrega]} · Pago:{" "}
+          {PAGO_LABEL[pedido.metodoPago]}
         </p>
       </div>
 
       {/* Historial */}
-      <div className="mt-6 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-display text-lg font-semibold text-foreground">
+      <div className="border-border bg-card mt-6 rounded-2xl border p-6">
+        <h2 className="font-display text-foreground text-lg font-semibold">
           Historial del pedido
         </h2>
         <ol className="mt-4 space-y-4">
           {pedido.historial.map((h) => (
             <li key={h.id} className="flex gap-3">
-              <span className="mt-1 size-2.5 shrink-0 rounded-full bg-primary" />
+              <span className="bg-primary mt-1 size-2.5 shrink-0 rounded-full" />
               <div>
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-foreground text-sm font-medium">
                   {ESTADO_LABEL[h.estado] ?? h.estado}
                 </p>
-                {h.nota && <p className="text-sm text-muted-foreground">{h.nota}</p>}
-                <p className="text-xs text-muted-foreground">{formatFecha(h.createdAt)}</p>
+                {h.nota && <p className="text-muted-foreground text-sm">{h.nota}</p>}
+                <p className="text-muted-foreground text-xs">
+                  {formatFecha(h.createdAt)}
+                </p>
               </div>
             </li>
           ))}

@@ -29,10 +29,10 @@ export function ProductCard({ p }: { p: ProductCardData }) {
   const precioFinal = enOferta ? p.precioOferta! : p.precio;
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
+    <div className="group border-border bg-card hover:shadow-primary/5 relative flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <Link
         href={`/producto/${p.slug}`}
-        className="relative block aspect-square overflow-hidden bg-secondary"
+        className="bg-secondary relative block aspect-square overflow-hidden"
       >
         <Image
           src={p.imagen}
@@ -42,38 +42,38 @@ export function ProductCard({ p }: { p: ProductCardData }) {
           unoptimized={p.imagen.endsWith(".svg")}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {p.nuevo && (
-            <span className="w-fit rounded-full bg-chart-5/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+            <span className="bg-chart-5/90 w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
               Nuevo
             </span>
           )}
           {enOferta && (
-            <span className="w-fit rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground shadow-sm">
+            <span className="bg-primary text-primary-foreground w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm">
               Oferta
             </span>
           )}
         </div>
         {p.agotado && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/55 backdrop-blur-[1px]">
-            <span className="rounded-full bg-foreground/85 px-3 py-1.5 text-xs font-semibold text-background">
+          <div className="bg-background/55 absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
+            <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold">
               Agotado
             </span>
           </div>
         )}
       </Link>
 
-      <div className="absolute right-3 top-3 z-10">
+      <div className="absolute top-3 right-3 z-10">
         <FavoriteIconButton productoId={p.id} inicial={p.favorito} />
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
           {p.marca}
         </span>
         <Link
           href={`/producto/${p.slug}`}
-          className="mt-1 line-clamp-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+          className="text-foreground hover:text-primary mt-1 line-clamp-2 text-sm font-medium transition-colors"
         >
           {p.nombre}
         </Link>
@@ -85,16 +85,16 @@ export function ProductCard({ p }: { p: ProductCardData }) {
               <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
             ))}
           </span>
-          <span className="text-xs text-muted-foreground">({p.reviews})</span>
+          <span className="text-muted-foreground text-xs">({p.reviews})</span>
         </div>
 
         {/* Precio */}
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-base font-semibold text-foreground">
+          <span className="text-foreground text-base font-semibold">
             {soles(precioFinal)}
           </span>
           {enOferta && (
-            <span className="text-xs text-muted-foreground line-through">
+            <span className="text-muted-foreground text-xs line-through">
               {soles(p.precio)}
             </span>
           )}
@@ -118,7 +118,8 @@ export function ProductCard({ p }: { p: ProductCardData }) {
               href={p.consultaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-chart-5/40 px-2 text-sm font-semibold text-[color:var(--chart-5)] transition-colors hover:bg-chart-5/10"
+              aria-label={`Consultar ${p.nombre} por WhatsApp`}
+              className="border-chart-5/40 hover:bg-chart-5/10 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border px-2 text-sm font-semibold whitespace-nowrap text-[color:var(--chart-5)] transition-colors"
             >
               <MessageCircle className="size-4 shrink-0" />
               WhatsApp

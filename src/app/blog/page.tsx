@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatFechaCorta } from "@/lib/date";
 import { getRedesSociales } from "@/lib/config";
+import { getMarcasAliadas } from "@/lib/cache";
 import { SocialLinks } from "@/components/tienda/social-links";
 import { Stagger, StaggerItem } from "@/components/tienda/motion";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,7 @@ export default async function BlogPage({
       select: { categoria: true },
       distinct: ["categoria"],
     }),
-    prisma.marca.findMany({ where: { aliada: true }, orderBy: { nombre: "asc" } }),
+    getMarcasAliadas(),
     getRedesSociales(),
   ]);
   const hayRedes = !!(redes.facebook || redes.instagram || redes.tiktok);
@@ -112,6 +113,8 @@ export default async function BlogPage({
                     fill
                     sizes="100vw"
                     priority
+                    fetchPriority="high"
+                    quality={65}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
