@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getPerfil } from "@/lib/auth";
+import { EstadoToggle } from "@/components/admin/usuario-acciones";
 
 export const metadata: Metadata = { title: "Clientes" };
 export const dynamic = "force-dynamic";
@@ -9,6 +11,7 @@ export const dynamic = "force-dynamic";
 const soles = (n: number) => `S/ ${n.toFixed(2)}`;
 
 export default async function AdminClientes() {
+  const yo = await getPerfil();
   const perfiles = await prisma.perfil.findMany({
     orderBy: { createdAt: "desc" },
     include: { pedidos: { select: { total: true, estado: true } } },
@@ -31,6 +34,7 @@ export default async function AdminClientes() {
       nombre: p.nombre,
       celular: p.celular,
       rol: p.rol,
+      activo: p.activo,
       email: emails.get(p.id) ?? "—",
       pedidos: p.pedidos.length,
       total: validos.reduce((s, o) => s + Number(o.total), 0),
@@ -52,6 +56,7 @@ export default async function AdminClientes() {
               <th className="px-4 py-3 font-medium">Celular</th>
               <th className="px-4 py-3 font-medium">Pedidos</th>
               <th className="px-4 py-3 text-right font-medium">Total gastado</th>
+              <th className="px-4 py-3 font-medium">Estado</th>
             </tr>
           </thead>
           <tbody className="divide-border divide-y">
@@ -70,6 +75,13 @@ export default async function AdminClientes() {
                 <td className="text-foreground/80 px-4 py-3">{c.pedidos}</td>
                 <td className="text-foreground px-4 py-3 text-right font-medium">
                   {soles(c.total)}
+                </td>
+                <td className="px-4 py-3">
+                  <EstadoToggle
+                    id={c.id}
+                    activo={c.activo}
+                    disabled={c.id === yo?.perfil.id}
+                  />
                 </td>
               </tr>
             ))}

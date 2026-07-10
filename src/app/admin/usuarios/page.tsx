@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getPerfil } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RolSelect } from "@/components/admin/rol-select";
+import { CambiarPassword, EstadoToggle } from "@/components/admin/usuario-acciones";
 
 export const metadata: Metadata = { title: "Usuarios" };
 export const dynamic = "force-dynamic";
@@ -38,6 +39,8 @@ export default async function AdminUsuarios() {
               <th className="px-4 py-3 font-medium">Usuario</th>
               <th className="px-4 py-3 font-medium">Correo</th>
               <th className="px-4 py-3 font-medium">Rol</th>
+              <th className="px-4 py-3 font-medium">Estado</th>
+              <th className="px-4 py-3 font-medium">Contraseña</th>
             </tr>
           </thead>
           <tbody className="divide-border divide-y">
@@ -56,6 +59,16 @@ export default async function AdminUsuarios() {
                 </td>
                 <td className="px-4 py-3">
                   <RolSelect id={p.id} rol={p.rol} disabled={p.id === yo.perfil.id} />
+                </td>
+                <td className="px-4 py-3">
+                  <EstadoToggle
+                    id={p.id}
+                    activo={p.activo}
+                    disabled={p.id === yo.perfil.id}
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <CambiarPassword id={p.id} />
                 </td>
               </tr>
             ))}

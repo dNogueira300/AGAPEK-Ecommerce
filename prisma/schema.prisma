@@ -55,6 +55,8 @@ model Perfil {
   dni         String?
   celular     String?
   rol         Rol         @default(CLIENTE)
+  /// Cuenta habilitada; en false el usuario no puede operar (se banea también en Auth).
+  activo      Boolean     @default(true)
   pedidos     Pedido[]
   direcciones Direccion[]
   favoritos   Producto[]  @relation("Favoritos")
