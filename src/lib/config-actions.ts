@@ -54,6 +54,19 @@ export async function guardarConfiguracion(
     await upsertConfig("logo_url", url);
   }
 
+  // Favicon (opcional): PNG cuadrado con fondo transparente.
+  const favicon = formData.get("favicon");
+  if (favicon instanceof File && favicon.size > 0) {
+    const url = await subirImagen(favicon, "logo/favicon", {
+      w: 256,
+      h: 256,
+      q: 90,
+      formato: "png",
+    });
+    if (!url) return { error: "No se pudo subir el favicon." };
+    await upsertConfig("favicon_url", url);
+  }
+
   // Imagen del banner de asesoría del home (CTA "Tu rutina ideal…").
   const cta = formData.get("cta_imagen");
   if (cta instanceof File && cta.size > 0) {
@@ -116,23 +129,29 @@ async function upsertConfig(clave: string, valor: string | object) {
   });
 }
 
-/** Optimiza a WebP y sube al bucket público. Devuelve la URL pública o null. */
+/** Optimiza (WebP por defecto; PNG cuadrado para favicon) y sube al bucket público. */
 async function subirImagen(
   file: File,
   prefijo: string,
-  opts: { w: number; h: number; q: number },
+  opts: { w: number; h: number; q: number; formato?: "webp" | "png" },
 ): Promise<string | null> {
   const { default: sharp } = await import("sharp");
   const buf = Buffer.from(await file.arrayBuffer());
-  const webp = await sharp(buf)
-    .resize(opts.w, opts.h, { fit: "inside", withoutEnlargement: true })
-    .webp({ quality: opts.q })
-    .toBuffer();
-  const path = `${prefijo}-${Date.now()}.webp`;
+  const png = opts.formato === "png";
+  let pipeline = sharp(buf).resize(opts.w, opts.h, {
+    // PNG (favicon): lienzo cuadrado con fondo transparente; WebP: encaja sin agrandar.
+    fit: png ? "contain" : "inside",
+    withoutEnlargement: !png,
+    background: { r: 0, g: 0, b: 0, alpha: 0 },
+  });
+  pipeline = png ? pipeline.png() : pipeline.webp({ quality: opts.q });
+  const salida = await pipeline.toBuffer();
+  const ext = png ? "png" : "webp";
+  const path = `${prefijo}-${Date.now()}.${ext}`;
   const admin = createAdminClient();
   const { error } = await admin.storage
     .from(BUCKET.publico)
-    .upload(path, webp, { contentType: "image/webp", upsert: true });
+    .upload(path, salida, { contentType: `image/${ext}`, upsert: true });
   if (error) return null;
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKET.publico}/${path}`;
 }

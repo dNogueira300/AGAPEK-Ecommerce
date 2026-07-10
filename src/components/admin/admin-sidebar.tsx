@@ -159,10 +159,12 @@ export function AdminSidebar({
   rol,
   nombre,
   reclamosPendientes = 0,
+  logoUrl = null,
 }: {
   rol: Rol;
   nombre: string;
   reclamosPendientes?: number;
+  logoUrl?: string | null;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -263,9 +265,14 @@ export function AdminSidebar({
       {/* Topbar móvil */}
       <div className="border-border bg-card flex items-center justify-between border-b px-4 py-3 lg:hidden">
         <Link href="/admin" className="flex items-center gap-2">
-          <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full">
-            <Sparkles className="size-4" />
-          </span>
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="AGAPEK" className="h-8 w-auto object-contain" />
+          ) : (
+            <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full">
+              <Sparkles className="size-4" />
+            </span>
+          )}
           <span className="font-display text-base font-semibold">AGAPEK Admin</span>
         </Link>
         <button
@@ -287,9 +294,14 @@ export function AdminSidebar({
       {/* Sidebar desktop */}
       <aside className="border-border bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
         <div className="border-border flex h-16 items-center gap-2.5 border-b px-5">
-          <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-full">
-            <Sparkles className="size-4.5" strokeWidth={2.25} />
-          </span>
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="AGAPEK" className="h-9 w-auto object-contain" />
+          ) : (
+            <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-full">
+              <Sparkles className="size-4.5" strokeWidth={2.25} />
+            </span>
+          )}
           <div className="leading-none">
             <p className="font-display text-base font-semibold">AGAPEK</p>
             <p className="text-muted-foreground text-[10px] tracking-[0.2em] uppercase">
