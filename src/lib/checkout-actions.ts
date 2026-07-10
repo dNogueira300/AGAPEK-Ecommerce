@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { ENTREGA_LABEL } from "@/lib/pedido-labels";
 import { getUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BUCKET } from "@/lib/supabase/storage";
@@ -44,10 +45,7 @@ async function costoEnvio(
 }
 
 function generarCodigo(): string {
-  const fecha = new Date()
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, "");
+  const fecha = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const rand = Array.from({ length: 4 }, () =>
     "ABCDEFGHJKMNPQRSTUVWXYZ23456789".charAt(Math.floor(Math.random() * 30)),
   ).join("");
@@ -174,7 +172,7 @@ export async function crearPedido(raw: CheckoutInput): Promise<CrearPedidoResult
                 nota:
                   input.metodoEntrega === "DELIVERY_LOCAL"
                     ? `Entrega: ${input.direccion}, ${input.distrito}${input.referencia ? ` (${input.referencia})` : ""}`
-                    : `Entrega: ${input.metodoEntrega}`,
+                    : `Entrega: ${ENTREGA_LABEL[input.metodoEntrega] ?? input.metodoEntrega}`,
               },
             },
           },
@@ -190,7 +188,8 @@ export async function crearPedido(raw: CheckoutInput): Promise<CrearPedidoResult
         return { error: "El cupón alcanzó su límite de usos." };
       }
       // Colisión de código u otro error transitorio → reintenta.
-      if (intento === 4) return { error: "No se pudo crear el pedido. Intenta de nuevo." };
+      if (intento === 4)
+        return { error: "No se pudo crear el pedido. Intenta de nuevo." };
     }
   }
   return { error: "No se pudo crear el pedido. Intenta de nuevo." };

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getConfigValor } from "@/lib/cache";
 import { formatFecha } from "@/lib/date";
 import { construirMensajePedido, urlWhatsApp } from "@/lib/whatsapp";
+import { humanizarNota } from "@/lib/pedido-labels";
 import { ComprobanteUpload } from "@/components/tienda/comprobante-upload";
 
 export const dynamic = "force-dynamic";
@@ -198,7 +199,9 @@ export default async function PedidoPage({
                 <p className="text-foreground text-sm font-medium">
                   {ESTADO_LABEL[h.estado] ?? h.estado}
                 </p>
-                {h.nota && <p className="text-muted-foreground text-sm">{h.nota}</p>}
+                {h.nota && (
+                  <p className="text-muted-foreground text-sm">{humanizarNota(h.nota)}</p>
+                )}
                 <p className="text-muted-foreground text-xs">
                   {formatFecha(h.createdAt)}
                 </p>

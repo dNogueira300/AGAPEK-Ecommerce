@@ -13,6 +13,7 @@ import {
   ESTADO_ORDEN,
   ESTADO_PAGO_LABEL,
   PAGO_LABEL,
+  humanizarNota,
   estadoBadge,
 } from "@/lib/pedido-labels";
 import { cn } from "@/lib/utils";
@@ -170,7 +171,11 @@ export default async function PedidoDetalle({
                     <p className="text-foreground text-sm font-medium">
                       {ESTADO_LABEL[h.estado] ?? h.estado}
                     </p>
-                    {h.nota && <p className="text-muted-foreground text-sm">{h.nota}</p>}
+                    {h.nota && (
+                      <p className="text-muted-foreground text-sm">
+                        {humanizarNota(h.nota)}
+                      </p>
+                    )}
                     <p className="text-muted-foreground text-xs">
                       {formatFecha(h.createdAt)}
                     </p>
@@ -259,6 +264,7 @@ export default async function PedidoDetalle({
               className="mt-3 space-y-3"
             >
               <select
+                key={pedido.estado}
                 name="estado"
                 defaultValue={pedido.estado}
                 className="border-input bg-card text-foreground focus-visible:border-ring h-11 w-full rounded-xl border px-4 text-sm outline-none"
