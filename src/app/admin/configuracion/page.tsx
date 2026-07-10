@@ -48,6 +48,7 @@ export default async function AdminConfiguracion() {
           values={values}
           logoUrl={str(c.logo_url) || null}
           ctaUrl={str(c.cta_home_imagen) || null}
+          faviconUrl={str(c.favicon_url) || null}
           redesExtra={parseRedesExtra(c.redes_extra)}
         />
       </div>

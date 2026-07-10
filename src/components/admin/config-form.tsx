@@ -58,11 +58,13 @@ export function ConfigForm({
   values,
   logoUrl,
   ctaUrl,
+  faviconUrl,
   redesExtra,
 }: {
   values: ConfigValues;
   logoUrl: string | null;
   ctaUrl: string | null;
+  faviconUrl: string | null;
   redesExtra: RedExtra[];
 }) {
   const [state, formAction, pending] = useActionState<ConfigState, FormData>(
@@ -71,6 +73,7 @@ export function ConfigForm({
   );
   const [logoPreview, setLogoPreview] = useState<string | null>(logoUrl);
   const [ctaPreview, setCtaPreview] = useState<string | null>(ctaUrl);
+  const [faviconPreview, setFaviconPreview] = useState<string | null>(faviconUrl);
   // Lista editable de redes adicionales: quitar aquí y guardar las elimina.
   const [extras, setExtras] = useState<RedExtra[]>(redesExtra);
   const [iconoPreview, setIconoPreview] = useState<string | null>(null);
@@ -111,6 +114,36 @@ export function ConfigForm({
           <p className="text-muted-foreground text-sm">
             Reemplaza el logo de AGAPEK en el encabezado y el pie. Se optimiza a WebP. Si
             lo dejas vacío, se usa el logo por defecto.
+          </p>
+        </div>
+
+        <div className="border-border flex items-center gap-4 border-t pt-4">
+          <label className="border-border bg-secondary relative flex size-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed">
+            {faviconPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={faviconPreview}
+                alt="Favicon"
+                className="size-10 object-contain"
+              />
+            ) : (
+              <ImagePlus className="text-primary size-5" />
+            )}
+            <input
+              type="file"
+              name="favicon"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                setFaviconPreview(f ? URL.createObjectURL(f) : faviconUrl);
+              }}
+              className="hidden"
+            />
+          </label>
+          <p className="text-muted-foreground text-sm">
+            <span className="text-foreground font-medium">Favicon</span> — el ícono de la
+            pestaña del navegador. Sube una imagen cuadrada (ideal PNG con fondo
+            transparente); se redimensiona a 256px.
           </p>
         </div>
       </section>

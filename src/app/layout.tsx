@@ -8,6 +8,7 @@ import { SmoothScroll } from "@/components/tienda/smooth-scroll";
 import { Watermark } from "@/components/tienda/watermark";
 import { getSesionUI } from "@/lib/auth";
 import { getRedesSociales, getLogoUrl } from "@/lib/config";
+import { getConfigValor } from "@/lib/cache";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,14 +22,19 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "AGAPEK | Boutique K-Beauty",
-    template: "%s | AGAPEK",
-  },
-  description:
-    "Skincare coreano para la piel loretana. Compra productos originales, arma tu rutina y recibe asesoría personalizada por WhatsApp.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Favicon administrable desde /admin/configuracion (fallback: favicon.ico del build).
+  const faviconUrl = await getConfigValor("favicon_url");
+  return {
+    title: {
+      default: "AGAPEK | Boutique K-Beauty",
+      template: "%s | AGAPEK",
+    },
+    description:
+      "Skincare coreano para la piel loretana. Compra productos originales, arma tu rutina y recibe asesoría personalizada por WhatsApp.",
+    ...(faviconUrl ? { icons: { icon: faviconUrl } } : {}),
+  };
+}
 
 export default async function RootLayout({
   children,
