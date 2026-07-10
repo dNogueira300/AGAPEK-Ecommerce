@@ -44,7 +44,18 @@ const nextConfig: NextConfig = {
     qualities: [50, 65, 75],
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      // Lighthouse "Use efficient cache lifetimes": los assets de /public están
+      // versionados por deploy → caché inmutable; el optimizador de imágenes
+      // hereda este max-age para sus respuestas.
+      {
+        source: "/:carpeta(banners|productos|marcas)/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+    ];
   },
 };
 
