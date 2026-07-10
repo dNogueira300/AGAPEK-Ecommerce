@@ -20,7 +20,10 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const count = banners.length;
 
-  const goTo = useCallback((i: number) => setIndex(((i % count) + count) % count), [count]);
+  const goTo = useCallback(
+    (i: number) => setIndex(((i % count) + count) % count),
+    [count],
+  );
   const next = useCallback(() => goTo(index + 1), [goTo, index]);
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
 
@@ -53,55 +56,92 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
         className="flex h-full transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
-        {banners.map((b) => (
-          <div key={b.id} className="relative h-full w-full shrink-0">
-            <Image
-              src={b.imagenUrl}
-              alt={b.titulo ?? "AGAPEK"}
-              fill
-              priority
-              sizes="100vw"
-              unoptimized={b.imagenUrl.endsWith(".svg")}
-              className="object-cover"
-            />
-            {/* Degradado para legibilidad del texto (izquierda) */}
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent sm:via-background/60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent sm:hidden" />
+        {banners.map((b, i) => {
+          const active = i === index;
+          // Entrada en cascada del contenido del slide activo (fade + rise).
+          const enter = (delayMs: number) => ({
+            className: cn(
+              "transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:transform-none",
+              active ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0",
+            ),
+            style: { transitionDelay: active ? `${delayMs}ms` : "0ms" },
+          });
+          return (
+            <div key={b.id} className="relative h-full w-full shrink-0 overflow-hidden">
+              <Image
+                src={b.imagenUrl}
+                alt={b.titulo ?? "AGAPEK"}
+                fill
+                priority
+                sizes="100vw"
+                unoptimized={b.imagenUrl.endsWith(".svg")}
+                className={cn("object-cover", active && "animate-kenburns")}
+              />
+              {/* Degradado para legibilidad del texto (izquierda) */}
+              <div className="from-background via-background/80 sm:via-background/60 absolute inset-0 bg-gradient-to-r to-transparent" />
+              <div className="from-background/70 absolute inset-0 bg-gradient-to-t via-transparent to-transparent sm:hidden" />
 
-            {/* Contenido */}
-            <div className="relative mx-auto flex h-full max-w-7xl items-center px-5 sm:px-6 lg:px-8">
-              <div className="max-w-xl">
-                <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/70 px-3.5 py-1.5 text-xs font-medium text-foreground/80 backdrop-blur">
-                  <Sparkles className="size-3.5 text-primary" />
-                  K-Beauty · Skincare coreano
-                </span>
-                <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                  {b.titulo}
-                </h1>
-                {b.subtitulo && (
-                  <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    {b.subtitulo}
-                  </p>
-                )}
-                <div className="mt-7 flex flex-wrap items-center gap-3">
-                  <Link
-                    href={b.enlace ?? "/catalogo"}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md"
+              {/* Contenido */}
+              <div className="relative mx-auto flex h-full max-w-7xl items-center px-5 sm:px-6 lg:px-8">
+                <div className="max-w-xl">
+                  <span
+                    style={enter(150).style}
+                    className={cn(
+                      "border-border/60 bg-card/70 text-foreground/80 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur",
+                      enter(150).className,
+                    )}
                   >
-                    {b.cta ?? "Ver catálogo"}
-                    <ArrowRight className="size-4" />
-                  </Link>
-                  <Link
-                    href="/rutinas"
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-6 py-3 text-sm font-semibold text-foreground backdrop-blur transition-colors hover:bg-card"
+                    <Sparkles className="text-primary size-3.5" />
+                    K-Beauty · Skincare coreano
+                  </span>
+                  <h1
+                    style={enter(280).style}
+                    className={cn(
+                      "font-display text-foreground mt-4 text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl lg:text-5xl",
+                      enter(280).className,
+                    )}
                   >
-                    Ver rutinas
-                  </Link>
+                    {b.titulo}
+                  </h1>
+                  {b.subtitulo && (
+                    <p
+                      style={enter(400).style}
+                      className={cn(
+                        "text-muted-foreground mt-4 max-w-md text-sm leading-relaxed sm:text-base",
+                        enter(400).className,
+                      )}
+                    >
+                      {b.subtitulo}
+                    </p>
+                  )}
+                  <div
+                    style={enter(520).style}
+                    className={cn(
+                      "mt-7 flex flex-wrap items-center gap-3",
+                      enter(520).className,
+                    )}
+                  >
+                    <Link
+                      href={b.enlace ?? "/catalogo"}
+                      tabIndex={active ? undefined : -1}
+                      className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97]"
+                    >
+                      {b.cta ?? "Ver catálogo"}
+                      <ArrowRight className="size-4" />
+                    </Link>
+                    <Link
+                      href="/rutinas"
+                      tabIndex={active ? undefined : -1}
+                      className="border-border bg-card/80 text-foreground hover:bg-card inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold backdrop-blur transition-colors active:scale-[0.97]"
+                    >
+                      Ver rutinas
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {count > 1 && (
@@ -110,7 +150,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
             type="button"
             onClick={prev}
             aria-label="Anterior"
-            className="absolute left-3 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-card/80 text-foreground shadow-sm backdrop-blur transition hover:bg-card sm:flex"
+            className="bg-card/80 text-foreground hover:bg-card absolute top-1/2 left-3 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full shadow-sm backdrop-blur transition sm:flex"
           >
             <ChevronLeft className="size-5" />
           </button>
@@ -118,7 +158,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
             type="button"
             onClick={next}
             aria-label="Siguiente"
-            className="absolute right-3 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-card/80 text-foreground shadow-sm backdrop-blur transition hover:bg-card sm:flex"
+            className="bg-card/80 text-foreground hover:bg-card absolute top-1/2 right-3 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full shadow-sm backdrop-blur transition sm:flex"
           >
             <ChevronRight className="size-5" />
           </button>
@@ -132,8 +172,8 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                 aria-label={`Ir al banner ${i + 1}`}
                 aria-current={i === index}
                 className={cn(
-                  "h-2 rounded-full bg-foreground/25 transition-all",
-                  i === index ? "w-6 bg-primary" : "w-2 hover:bg-foreground/50",
+                  "bg-foreground/25 h-2 rounded-full transition-all",
+                  i === index ? "bg-primary w-6" : "hover:bg-foreground/50 w-2",
                 )}
               />
             ))}

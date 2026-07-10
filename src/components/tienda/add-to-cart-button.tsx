@@ -30,11 +30,15 @@ export function AddToCartIcon({
       disabled={agotado}
       aria-label={agotado ? "Producto agotado" : `Agregar ${producto.nombre} al carrito`}
       className={cn(
-        "inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md",
+        "bg-primary text-primary-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-full shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md active:scale-95 motion-reduce:transform-none",
         agotado && "cursor-not-allowed opacity-40 hover:translate-y-0 hover:shadow-sm",
       )}
     >
-      {ok ? <Check className="size-4.5" strokeWidth={2.5} /> : <Plus className="size-4.5" strokeWidth={2.5} />}
+      {ok ? (
+        <Check className="size-4.5" strokeWidth={2.5} />
+      ) : (
+        <Plus className="size-4.5" strokeWidth={2.5} />
+      )}
     </button>
   );
 }
@@ -61,7 +65,7 @@ export function AddToCartWide({
       onClick={handle}
       disabled={agotado}
       className={cn(
-        "inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-foreground text-sm font-semibold text-background transition-colors hover:bg-foreground/90",
+        "bg-foreground text-background hover:bg-foreground/90 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold transition-[background-color,transform] active:scale-[0.98] motion-reduce:transform-none",
         agotado && "cursor-not-allowed opacity-40",
       )}
     >
@@ -101,12 +105,12 @@ export function AddToCartFull({
   return (
     <div className="flex flex-wrap items-center gap-3">
       {!agotado && (
-        <div className="inline-flex items-center rounded-full border border-border bg-card">
+        <div className="border-border bg-card inline-flex items-center rounded-full border">
           <button
             type="button"
             onClick={dec}
             aria-label="Disminuir cantidad"
-            className="flex size-10 items-center justify-center rounded-l-full text-foreground transition-colors hover:bg-secondary"
+            className="text-foreground hover:bg-secondary flex size-10 items-center justify-center rounded-l-full transition-colors"
           >
             <Minus className="size-4" />
           </button>
@@ -117,7 +121,7 @@ export function AddToCartFull({
             type="button"
             onClick={inc}
             aria-label="Aumentar cantidad"
-            className="flex size-10 items-center justify-center rounded-r-full text-foreground transition-colors hover:bg-secondary"
+            className="text-foreground hover:bg-secondary flex size-10 items-center justify-center rounded-r-full transition-colors"
           >
             <Plus className="size-4" />
           </button>
@@ -129,7 +133,7 @@ export function AddToCartFull({
         onClick={handle}
         disabled={agotado}
         className={cn(
-          "inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md",
+          "bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md active:scale-95 motion-reduce:transform-none",
           agotado && "cursor-not-allowed opacity-40 hover:translate-y-0 hover:shadow-sm",
         )}
       >
