@@ -25,13 +25,14 @@ const soles = (n: number) => `S/ ${n.toFixed(2)}`;
 /** Construye el texto del pedido para enviar por WhatsApp. */
 export function construirMensajePedido(p: ResumenPedido): string {
   const lineas = [
-    `¡Hola AGAPEK! 🌸 Quiero confirmar mi pedido *${p.codigo}*.`,
+    `¡Hola AGAPEK! Quiero confirmar mi pedido *${p.codigo}*.`,
     "",
     `*Cliente:* ${p.cliente}`,
     "",
     "*Productos:*",
     ...p.items.map(
-      (it) => `• ${it.cantidad}× ${it.nombre} — ${soles(it.precioUnitario * it.cantidad)}`,
+      (it) =>
+        `• ${it.cantidad}× ${it.nombre} — ${soles(it.precioUnitario * it.cantidad)}`,
     ),
     "",
     `*Entrega:* ${p.metodoEntrega}`,

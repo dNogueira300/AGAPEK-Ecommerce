@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   Package,
+  Search,
   ShoppingBag,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -21,14 +22,23 @@ export const dynamic = "force-dynamic";
 
 const soles = (n: number) => `S/ ${n.toFixed(2)}`;
 
-export default async function PerfilPage() {
+export default async function PerfilPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const data = await getPerfil();
   if (!data) redirect("/login?redirect=/perfil");
 
   const { perfil, email } = data;
+  const { q } = await searchParams;
+  const busqueda = q?.trim() ?? "";
 
   const pedidos = await prisma.pedido.findMany({
-    where: { perfilId: perfil.id },
+    where: {
+      perfilId: perfil.id,
+      ...(busqueda ? { codigo: { contains: busqueda, mode: "insensitive" } } : {}),
+    },
     orderBy: { createdAt: "desc" },
     include: { items: true },
   });
@@ -82,20 +92,46 @@ export default async function PerfilPage() {
           )}
         </div>
 
+        {/* Buscar por código de seguimiento */}
+        <form action="/perfil" className="mt-4">
+          <div className="relative max-w-sm">
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+            <input
+              type="search"
+              name="q"
+              defaultValue={busqueda}
+              placeholder="Buscar por código (ej. AGK-20260710-8YJM)"
+              aria-label="Buscar pedido por código de seguimiento"
+              className="border-input bg-card text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/30 h-11 w-full rounded-full border pr-4 pl-10 text-sm transition-colors outline-none focus-visible:ring-2"
+            />
+          </div>
+        </form>
+
         {pedidos.length === 0 ? (
           <div className="border-border bg-secondary/30 mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-12 text-center">
             <span className="bg-background text-primary flex size-12 items-center justify-center rounded-full shadow-sm">
               <Package className="size-6" />
             </span>
             <p className="text-muted-foreground mt-3 text-sm">
-              Todavía no realizas ningún pedido.
+              {busqueda
+                ? `No encontramos pedidos con el código “${busqueda}”.`
+                : "Todavía no realizas ningún pedido."}
             </p>
-            <Link
-              href="/catalogo"
-              className="bg-primary text-primary-foreground mt-4 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
-            >
-              Ir al catálogo
-            </Link>
+            {busqueda ? (
+              <Link
+                href="/perfil"
+                className="text-primary mt-4 text-sm font-semibold hover:underline"
+              >
+                Ver todos mis pedidos
+              </Link>
+            ) : (
+              <Link
+                href="/catalogo"
+                className="bg-primary text-primary-foreground mt-4 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
+              >
+                Ir al catálogo
+              </Link>
+            )}
           </div>
         ) : (
           <ul className="mt-4 space-y-3">

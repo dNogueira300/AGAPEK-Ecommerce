@@ -56,3 +56,18 @@ export function estadoBadge(estado: string): string {
       return "bg-secondary text-foreground";
   }
 }
+
+/**
+ * Reemplaza códigos internos (RECOJO_ALMACEN, YAPE…) por su etiqueta legible
+ * dentro de una nota de historial. Cubre notas antiguas guardadas con el enum crudo.
+ */
+export function humanizarNota(nota: string): string {
+  let out = nota;
+  for (const [k, v] of [
+    ...Object.entries(ENTREGA_LABEL),
+    ...Object.entries(PAGO_LABEL),
+  ]) {
+    out = out.replace(new RegExp("\\b" + k + "\\b", "g"), v);
+  }
+  return out;
+}
