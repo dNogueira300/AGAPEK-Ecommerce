@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { formatFechaCorta } from "@/lib/date";
 import { getRedesSociales } from "@/lib/config";
 import { SocialLinks } from "@/components/tienda/social-links";
+import { Stagger, StaggerItem } from "@/components/tienda/motion";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -16,8 +17,8 @@ export const dynamic = "force-dynamic";
 
 function Meta({ autor, fecha }: { autor: string | null; fecha: Date }) {
   return (
-    <p className="text-xs text-muted-foreground">
-      {autor && <span className="font-medium text-foreground/70">Por {autor}</span>}
+    <p className="text-muted-foreground text-xs">
+      {autor && <span className="text-foreground/70 font-medium">Por {autor}</span>}
       {autor && " · "}
       {formatFechaCorta(fecha)}
     </p>
@@ -53,12 +54,15 @@ export default async function BlogPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <header className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">The AGAPEK Journal</p>
-        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+        <p className="text-primary text-xs font-semibold tracking-[0.25em] uppercase">
+          The AGAPEK Journal
+        </p>
+        <h1 className="font-display text-foreground mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
           Blog de Skincare
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-          Aprende a cuidar tu piel con consejos de expertas y descubre los secretos del K-Beauty.
+        <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-sm leading-relaxed">
+          Aprende a cuidar tu piel con consejos de expertas y descubre los secretos del
+          K-Beauty.
         </p>
       </header>
 
@@ -68,7 +72,9 @@ export default async function BlogPage({
           href="/blog"
           className={cn(
             "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-            !c ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground/80 hover:bg-secondary",
+            !c
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-card text-foreground/80 hover:bg-secondary",
           )}
         >
           Todos
@@ -79,7 +85,9 @@ export default async function BlogPage({
             href={`/blog?c=${encodeURIComponent(cat)}`}
             className={cn(
               "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-              c === cat ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground/80 hover:bg-secondary",
+              c === cat
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground/80 hover:bg-secondary",
             )}
           >
             {cat}
@@ -88,7 +96,7 @@ export default async function BlogPage({
       </nav>
 
       {posts.length === 0 ? (
-        <p className="mt-10 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
+        <p className="border-border bg-card text-muted-foreground mt-10 rounded-2xl border border-dashed p-10 text-center">
           Pronto publicaremos nuevos artículos.
         </p>
       ) : (
@@ -107,23 +115,24 @@ export default async function BlogPage({
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className="relative z-10 mx-4 -mt-16 rounded-3xl border border-border bg-card p-7 shadow-xl sm:mx-8 md:absolute md:right-10 md:top-1/2 md:mx-0 md:mt-0 md:max-w-md md:-translate-y-1/2">
+                <div className="border-border bg-card relative z-10 mx-4 -mt-16 rounded-3xl border p-7 shadow-xl sm:mx-8 md:absolute md:top-1/2 md:right-10 md:mx-0 md:mt-0 md:max-w-md md:-translate-y-1/2">
                   {destacado.categoria && (
-                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                    <span className="text-primary text-xs font-semibold tracking-wide uppercase">
                       {destacado.categoria}
                     </span>
                   )}
-                  <h2 className="mt-2 font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
+                  <h2 className="font-display text-foreground mt-2 text-2xl leading-tight font-semibold sm:text-3xl">
                     {destacado.titulo}
                   </h2>
                   <div className="mt-2">
                     <Meta autor={destacado.autor} fecha={destacado.createdAt} />
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
                     {destacado.resumen}
                   </p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                    Continuar <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  <span className="text-primary mt-4 inline-flex items-center gap-1.5 text-sm font-semibold">
+                    Continuar{" "}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
@@ -132,47 +141,49 @@ export default async function BlogPage({
 
           {/* Grid */}
           {resto.length > 0 && (
-            <div className="reveal grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            <Stagger className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {resto.map((post) => (
-                <article key={post.id}>
-                  <Link href={`/blog/${post.slug}`} className="group block">
-                    <div className="relative aspect-[16/11] overflow-hidden rounded-2xl">
-                      <Image
-                        src={post.portadaUrl ?? "/productos/generico.svg"}
-                        alt={post.titulo}
-                        fill
-                        sizes="(max-width: 640px) 100vw, 33vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="mt-4">
-                      {post.categoria && (
-                        <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                          {post.categoria}
-                        </span>
-                      )}
-                      <h3 className="mt-1.5 font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
-                        {post.titulo}
-                      </h3>
-                      <div className="mt-2">
-                        <Meta autor={post.autor} fecha={post.createdAt} />
+                <StaggerItem key={post.id}>
+                  <article>
+                    <Link href={`/blog/${post.slug}`} className="group block">
+                      <div className="relative aspect-[16/11] overflow-hidden rounded-2xl">
+                        <Image
+                          src={post.portadaUrl ?? "/productos/generico.svg"}
+                          alt={post.titulo}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
                       </div>
-                    </div>
-                  </Link>
-                </article>
+                      <div className="mt-4">
+                        {post.categoria && (
+                          <span className="text-primary text-xs font-semibold tracking-wide uppercase">
+                            {post.categoria}
+                          </span>
+                        )}
+                        <h3 className="font-display text-foreground group-hover:text-primary mt-1.5 text-lg leading-snug font-semibold transition-colors">
+                          {post.titulo}
+                        </h3>
+                        <div className="mt-2">
+                          <Meta autor={post.autor} fecha={post.createdAt} />
+                        </div>
+                      </div>
+                    </Link>
+                  </article>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           )}
         </div>
       )}
 
       {/* Marcas destacadas */}
       {marcas.length > 0 && (
-        <section className="mt-16 border-t border-border pt-12">
-          <h2 className="text-center font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        <section className="border-border mt-16 border-t pt-12">
+          <h2 className="font-display text-foreground text-center text-2xl font-semibold tracking-tight sm:text-3xl">
             Marcas destacadas
           </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-center text-sm">
             Las marcas coreanas originales que encuentras en AGAPEK.
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -180,7 +191,7 @@ export default async function BlogPage({
               <Link
                 key={m.id}
                 href={`/catalogo?marca=${m.slug}`}
-                className="flex items-center justify-center rounded-2xl border border-border bg-card p-6 text-center font-display text-base font-semibold text-foreground/80 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:text-primary hover:shadow-md"
+                className="border-border bg-card font-display text-foreground/80 hover:border-primary/30 hover:text-primary flex items-center justify-center rounded-2xl border p-6 text-center text-base font-semibold shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
               >
                 {m.nombre}
               </Link>
@@ -191,14 +202,18 @@ export default async function BlogPage({
 
       {/* Redes sociales */}
       {hayRedes && (
-        <section className="mt-16 rounded-3xl border border-border bg-secondary/50 p-10 text-center">
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        <section className="border-border bg-secondary/50 mt-16 rounded-3xl border p-10 text-center">
+          <h2 className="font-display text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
             Síguenos en redes
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-sm">
             Tips, novedades y rutinas todos los días.
           </p>
-          <SocialLinks redes={redes} className="mt-6 justify-center" itemClassName="size-12" />
+          <SocialLinks
+            redes={redes}
+            className="mt-6 justify-center"
+            itemClassName="size-12"
+          />
         </section>
       )}
     </div>

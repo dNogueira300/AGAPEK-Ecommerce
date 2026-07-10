@@ -6,6 +6,7 @@ import { toProductCard } from "@/lib/product-card";
 import { getFavoritoIds } from "@/lib/favorito-actions";
 import { CatalogSidebar } from "@/components/tienda/catalog-sidebar";
 import { CatalogSort } from "@/components/tienda/catalog-sort";
+import { Stagger, StaggerItem } from "@/components/tienda/motion";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -56,7 +57,10 @@ export default async function CatalogoPage({
 
   const precioFilter: Prisma.DecimalFilter | undefined =
     min !== undefined || max !== undefined
-      ? { ...(min !== undefined ? { gte: min } : {}), ...(max !== undefined ? { lte: max } : {}) }
+      ? {
+          ...(min !== undefined ? { gte: min } : {}),
+          ...(max !== undefined ? { lte: max } : {}),
+        }
       : undefined;
 
   const where: Prisma.ProductoWhereInput = {
@@ -88,13 +92,13 @@ export default async function CatalogoPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Encabezado */}
-      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="border-border flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs text-muted-foreground">Inicio / Catálogo</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <p className="text-muted-foreground text-xs">Inicio / Catálogo</p>
+          <h1 className="font-display text-foreground mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
             {busqueda ? `Resultados para “${busqueda}”` : "Catálogo"}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {cards.length} producto{cards.length === 1 ? "" : "s"}
           </p>
         </div>
@@ -110,15 +114,17 @@ export default async function CatalogoPage({
 
         <div className="flex-1">
           {cards.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
+            <p className="border-border bg-card text-muted-foreground rounded-2xl border border-dashed p-10 text-center">
               No encontramos productos con esos filtros.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-3" stagger={0.05}>
               {cards.map((p) => (
-                <ProductCard key={p.slug} p={p} />
+                <StaggerItem key={p.slug}>
+                  <ProductCard p={p} />
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           )}
         </div>
       </div>

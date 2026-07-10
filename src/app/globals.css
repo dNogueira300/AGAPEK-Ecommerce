@@ -178,26 +178,38 @@
   }
 }
 
-/* Reveal al hacer scroll (scroll-driven; anima al subir y bajar).
-   Solo aplica opacidad 0 si el navegador soporta animation-timeline,
-   así en navegadores sin soporte el contenido se ve normal. */
-@keyframes reveal-up {
+/* Ken Burns: deriva lenta de la imagen activa del hero (sutil, tras el degradado). */
+@keyframes hero-kenburns {
   from {
-    opacity: 0;
-    transform: translateY(28px);
+    transform: scale(1);
   }
   to {
-    opacity: 1;
-    transform: none;
+    transform: scale(1.06);
   }
 }
 
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: reveal-up linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 22%;
-    }
+.animate-kenburns {
+  animation: hero-kenburns 8s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-kenburns {
+    animation: none;
   }
+}
+
+/* Lenis (smooth scroll) — recomendaciones del propio paquete */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
 }
