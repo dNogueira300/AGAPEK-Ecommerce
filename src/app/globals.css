@@ -210,16 +210,11 @@
 /* Marca de agua: estrella del logo (lucide Sparkles) repetida en dos capas
    desfasadas para un patrón escalonado, en rosa de marca muy tenue. */
 .watermark {
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%23c23c7c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c23c7c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z'/%3E%3C/svg%3E");
-  background-size:
-    180px 180px,
-    180px 180px;
-  background-position:
-    24px 32px,
-    114px 122px;
-  opacity: 0.05;
+  /* Tile de 720px con estrellas esparcidas a mano (posición, tamaño, giro y
+     opacidad variados) para que parezca cielo estrellado y no un patrón. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='720' viewBox='0 0 720 720'%3E%3Cdefs%3E%3Cpath id='e' d='M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z' fill='none' stroke='%23c23c7c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/defs%3E%3Cuse href='%23e' transform='translate(52 38) rotate(14 12 12) scale(1.9)' opacity='.9'/%3E%3Cuse href='%23e' transform='translate(272 84) rotate(-22 12 12) scale(.65)' opacity='.55'/%3E%3Cuse href='%23e' transform='translate(468 46) rotate(31 12 12) scale(1.15)' opacity='.75'/%3E%3Cuse href='%23e' transform='translate(636 142) rotate(-9 12 12) scale(.55)' opacity='.5'/%3E%3Cuse href='%23e' transform='translate(148 206) rotate(48 12 12) scale(.8)' opacity='.6'/%3E%3Cuse href='%23e' transform='translate(362 238) rotate(-15 12 12) scale(2.1)' opacity='1'/%3E%3Cuse href='%23e' transform='translate(592 296) rotate(24 12 12) scale(.95)' opacity='.65'/%3E%3Cuse href='%23e' transform='translate(76 388) rotate(-38 12 12) scale(1.25)' opacity='.8'/%3E%3Cuse href='%23e' transform='translate(246 462) rotate(8 12 12) scale(.6)' opacity='.5'/%3E%3Cuse href='%23e' transform='translate(494 428) rotate(-27 12 12) scale(.75)' opacity='.6'/%3E%3Cuse href='%23e' transform='translate(646 512) rotate(19 12 12) scale(1.6)' opacity='.9'/%3E%3Cuse href='%23e' transform='translate(116 578) rotate(-11 12 12) scale(.9)' opacity='.65'/%3E%3Cuse href='%23e' transform='translate(324 630) rotate(36 12 12) scale(1.35)' opacity='.8'/%3E%3Cuse href='%23e' transform='translate(552 646) rotate(-30 12 12) scale(.55)' opacity='.5'/%3E%3C/svg%3E");
+  background-size: 720px 720px;
+  opacity: 0.06;
 }
 
 .dark .watermark {
