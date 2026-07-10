@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { DollarSign, Receipt, TrendingUp } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { DollarSign, FileSpreadsheet, FileText, Receipt, TrendingUp } from "lucide-react";
+import { EstadoPedido } from "@prisma/client";
 import { getPerfil } from "@/lib/auth";
-import { formatFecha } from "@/lib/date";
 import { ESTADO_LABEL } from "@/lib/pedido-labels";
+import { getReporteData, parseFiltros } from "@/lib/reportes";
 import {
   EstadoDoughnut,
   TopProductosBar,
@@ -16,70 +16,122 @@ export const dynamic = "force-dynamic";
 
 const soles = (n: number) => `S/ ${n.toFixed(2)}`;
 
-export default async function AdminReportes() {
+const inputClass =
+  "h-10 rounded-lg border border-input bg-card px-3 text-sm text-foreground outline-none focus-visible:border-ring";
+
+export default async function AdminReportes({
+  searchParams,
+}: {
+  searchParams: Promise<{ desde?: string; hasta?: string; estado?: string }>;
+}) {
   const data = await getPerfil();
   if (!data) redirect("/login?redirect=/admin/reportes");
   if (data.perfil.rol === "VENDEDOR") redirect("/admin");
 
-  const [agg, porEstado, topItems, ventas] = await Promise.all([
-    prisma.pedido.aggregate({
-      _sum: { total: true },
-      _count: { _all: true },
-      where: { estado: { notIn: ["CANCELADO"] } },
-    }),
-    prisma.pedido.groupBy({ by: ["estado"], _count: { _all: true } }),
-    prisma.pedidoItem.groupBy({
-      by: ["productoId"],
-      _sum: { cantidad: true },
-      orderBy: { _sum: { cantidad: "desc" } },
-      take: 8,
-    }),
-    prisma.pedido.findMany({
-      where: {
-        estado: { notIn: ["CANCELADO"] },
-        createdAt: { gte: new Date(Date.now() - 183 * 86400000) },
-      },
-      select: { total: true, createdAt: true },
-    }),
-  ]);
-
-  const totalVentas = Number(agg._sum.total ?? 0);
-  const totalPedidos = agg._count._all;
-  const ticket = totalPedidos ? totalVentas / totalPedidos : 0;
-
-  // Ventas por mes (últimos 6 meses, hora Lima)
-  const meses = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - (5 - i));
-    return { key: formatFecha(d, "yyyy-MM"), label: formatFecha(d, "MM/yyyy") };
-  });
-  const sumMes = new Map<string, number>();
-  for (const v of ventas) {
-    const k = formatFecha(v.createdAt, "yyyy-MM");
-    sumMes.set(k, (sumMes.get(k) ?? 0) + Number(v.total));
-  }
-
-  // Top productos (nombres)
-  const nombres = new Map(
-    (
-      await prisma.producto.findMany({
-        where: { id: { in: topItems.map((t) => t.productoId) } },
-        select: { id: true, nombre: true },
-      })
-    ).map((p) => [p.id, p.nombre]),
-  );
+  const filtros = parseFiltros(await searchParams);
+  const reporte = await getReporteData(filtros);
 
   const kpis = [
-    { label: "Ventas (no anuladas)", value: soles(totalVentas), icon: DollarSign },
-    { label: "Pedidos", value: totalPedidos, icon: Receipt },
-    { label: "Ticket promedio", value: soles(ticket), icon: TrendingUp },
+    {
+      label: filtros.qs.estado ? "Ventas (estado filtrado)" : "Ventas (no anuladas)",
+      value: soles(reporte.kpis.totalVentas),
+      icon: DollarSign,
+    },
+    { label: "Pedidos", value: reporte.kpis.totalPedidos, icon: Receipt },
+    { label: "Ticket promedio", value: soles(reporte.kpis.ticket), icon: TrendingUp },
   ];
+
+  const exportQs = new URLSearchParams({
+    desde: filtros.qs.desde,
+    hasta: filtros.qs.hasta,
+    ...(filtros.qs.estado ? { estado: filtros.qs.estado } : {}),
+  }).toString();
 
   return (
     <div>
       <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
         Reportes
       </h1>
+
+      {/* Filtros + exportación */}
+      <div className="border-border bg-card mt-6 flex flex-wrap items-end gap-3 rounded-2xl border p-4">
+        <form method="GET" className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <label
+              htmlFor="desde"
+              className="text-muted-foreground block text-xs font-medium"
+            >
+              Desde
+            </label>
+            <input
+              id="desde"
+              type="date"
+              name="desde"
+              defaultValue={filtros.qs.desde}
+              className={inputClass}
+            />
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="hasta"
+              className="text-muted-foreground block text-xs font-medium"
+            >
+              Hasta
+            </label>
+            <input
+              id="hasta"
+              type="date"
+              name="hasta"
+              defaultValue={filtros.qs.hasta}
+              className={inputClass}
+            />
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="estado"
+              className="text-muted-foreground block text-xs font-medium"
+            >
+              Estado
+            </label>
+            <select
+              id="estado"
+              name="estado"
+              defaultValue={filtros.qs.estado}
+              className={inputClass}
+            >
+              <option value="">Todos</option>
+              {Object.values(EstadoPedido).map((e) => (
+                <option key={e} value={e}>
+                  {ESTADO_LABEL[e] ?? e}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="bg-primary text-primary-foreground h-10 rounded-full px-5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
+          >
+            Aplicar
+          </button>
+        </form>
+
+        <div className="ml-auto flex gap-2">
+          <a
+            href={`/api/admin/reportes/export?formato=excel&${exportQs}`}
+            className="border-border bg-card text-foreground hover:bg-secondary inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors"
+          >
+            <FileSpreadsheet className="size-4 text-[color:var(--chart-5)]" />
+            Excel
+          </a>
+          <a
+            href={`/api/admin/reportes/export?formato=pdf&${exportQs}`}
+            className="border-border bg-card text-foreground hover:bg-secondary inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors"
+          >
+            <FileText className="text-destructive size-4" />
+            PDF
+          </a>
+        </div>
+      </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         {kpis.map((k) => (
@@ -101,8 +153,8 @@ export default async function AdminReportes() {
             Ventas por mes
           </h2>
           <VentasMesBar
-            labels={meses.map((m) => m.label)}
-            data={meses.map((m) => sumMes.get(m.key) ?? 0)}
+            labels={reporte.ventasMes.map((m) => m.label)}
+            data={reporte.ventasMes.map((m) => m.total)}
           />
         </section>
 
@@ -110,14 +162,14 @@ export default async function AdminReportes() {
           <h2 className="font-display text-foreground mb-4 text-lg font-semibold">
             Pedidos por estado
           </h2>
-          {porEstado.length > 0 ? (
+          {reporte.estados.length > 0 ? (
             <EstadoDoughnut
-              labels={porEstado.map((e) => ESTADO_LABEL[e.estado] ?? e.estado)}
-              data={porEstado.map((e) => e._count._all)}
+              labels={reporte.estados.map((e) => e.label)}
+              data={reporte.estados.map((e) => e.cantidad)}
             />
           ) : (
             <p className="text-muted-foreground py-16 text-center text-sm">
-              Aún no hay pedidos.
+              No hay pedidos en el rango seleccionado.
             </p>
           )}
         </section>
@@ -126,14 +178,14 @@ export default async function AdminReportes() {
           <h2 className="font-display text-foreground mb-4 text-lg font-semibold">
             Productos más vendidos
           </h2>
-          {topItems.length > 0 ? (
+          {reporte.topProductos.length > 0 ? (
             <TopProductosBar
-              labels={topItems.map((t) => nombres.get(t.productoId) ?? "—")}
-              data={topItems.map((t) => t._sum.cantidad ?? 0)}
+              labels={reporte.topProductos.map((t) => t.nombre)}
+              data={reporte.topProductos.map((t) => t.cantidad)}
             />
           ) : (
             <p className="text-muted-foreground py-16 text-center text-sm">
-              Aún no hay ventas registradas.
+              No hay ventas en el rango seleccionado.
             </p>
           )}
         </section>

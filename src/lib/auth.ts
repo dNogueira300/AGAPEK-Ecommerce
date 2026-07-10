@@ -47,6 +47,8 @@ export async function getPerfil(): Promise<PerfilConEmail | null> {
       "Cliente";
     perfil = await prisma.perfil.create({ data: { id: user.id, nombre } });
   }
+  // Cuenta desactivada por un administrador → se trata como sin sesión.
+  if (!perfil.activo) return null;
   return { perfil, email: user.email ?? null };
 }
 
