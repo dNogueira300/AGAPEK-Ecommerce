@@ -8,7 +8,10 @@ import { requireRoles } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BUCKET } from "@/lib/supabase/storage";
 
-export const CLAVES = [
+// Nota: este archivo es "use server" — solo puede EXPORTAR funciones async.
+// CLAVES debe permanecer sin exportar (exportarlo rompía el módulo en producción
+// con el digest E352: «A "use server" file can only export async functions»).
+const CLAVES = [
   "whatsapp",
   "yape",
   "plin",
