@@ -26,45 +26,68 @@ export default async function AdminRutinas() {
     <div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Rutinas</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{rutinas.length} rutinas.</p>
+          <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+            Rutinas
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">{rutinas.length} rutinas.</p>
         </div>
-        <Link href="/admin/rutinas/nuevo" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5">
+        <Link
+          href="/admin/rutinas/nuevo"
+          className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
+        >
           <Plus className="size-4" /> Nueva rutina
         </Link>
       </div>
 
       {rutinas.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
+        <p className="border-border bg-card text-muted-foreground mt-6 rounded-2xl border border-dashed p-10 text-center">
           Aún no hay rutinas.
         </p>
       ) : (
         <div className="mt-6 space-y-3">
           {rutinas.map((r) => (
-            <div key={r.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-secondary text-primary">
+            <div
+              key={r.id}
+              className="border-border bg-card flex items-center gap-4 rounded-2xl border p-4"
+            >
+              <span className="from-primary/15 to-secondary text-primary flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br">
                 <Sparkles className="size-5" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-foreground">{r.titulo}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {PIEL_LABEL[r.tipoPiel] ?? r.tipoPiel} · {r._count.pasos} {r._count.pasos === 1 ? "paso" : "pasos"} · orden {r.orden}
+                <p className="text-foreground truncate font-medium">{r.titulo}</p>
+                <p className="text-muted-foreground truncate text-xs">
+                  {PIEL_LABEL[r.tipoPiel] ?? r.tipoPiel} · {r._count.pasos}{" "}
+                  {r._count.pasos === 1 ? "paso" : "pasos"} · orden {r.orden}
                 </p>
               </div>
-              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${r.publicado ? "bg-chart-5/15 text-[color:var(--chart-5)]" : "bg-secondary text-muted-foreground"}`}>
+              <span
+                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${r.publicado ? "bg-chart-5/15 text-[color:var(--chart-5)]" : "bg-secondary text-muted-foreground"}`}
+              >
                 {r.publicado ? "Publicada" : "Borrador"}
               </span>
               <div className="flex shrink-0 items-center gap-1">
-                <Link href={`/admin/rutinas/${r.id}/editar`} aria-label="Editar" className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-secondary hover:text-foreground">
+                <Link
+                  href={`/admin/rutinas/${r.id}/editar`}
+                  aria-label="Editar"
+                  className="text-foreground/70 hover:bg-secondary hover:text-foreground inline-flex size-9 items-center justify-center rounded-lg"
+                >
                   <Pencil className="size-4" />
                 </Link>
                 <form action={togglePublicadoRutina.bind(null, r.id)}>
-                  <button type="submit" aria-label={r.publicado ? "Despublicar" : "Publicar"} className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-secondary hover:text-foreground">
+                  <button
+                    type="submit"
+                    aria-label={r.publicado ? "Despublicar" : "Publicar"}
+                    className="text-foreground/70 hover:bg-secondary hover:text-foreground inline-flex size-9 items-center justify-center rounded-lg"
+                  >
                     <Power className="size-4" />
                   </button>
                 </form>
                 <form action={eliminarRutina.bind(null, r.id)}>
-                  <button type="submit" aria-label="Eliminar" className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-destructive/10 hover:text-destructive">
+                  <button
+                    type="submit"
+                    aria-label="Eliminar"
+                    className="text-foreground/70 hover:bg-destructive/10 hover:text-destructive inline-flex size-9 items-center justify-center rounded-lg"
+                  >
                     <Trash2 className="size-4" />
                   </button>
                 </form>

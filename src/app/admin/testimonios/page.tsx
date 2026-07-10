@@ -14,44 +14,72 @@ export default async function AdminTestimonios() {
     <div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Testimonios</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{testimonios.length} reseñas.</p>
+          <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+            Testimonios
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {testimonios.length} reseñas.
+          </p>
         </div>
-        <Link href="/admin/testimonios/nuevo" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5">
+        <Link
+          href="/admin/testimonios/nuevo"
+          className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:-translate-y-0.5"
+        >
           <Plus className="size-4" /> Nuevo testimonio
         </Link>
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {testimonios.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground md:col-span-2">Aún no hay testimonios.</p>
+          <p className="border-border bg-card text-muted-foreground rounded-2xl border border-dashed p-10 text-center md:col-span-2">
+            Aún no hay testimonios.
+          </p>
         ) : (
           testimonios.map((t) => (
-            <div key={t.id} className="flex flex-col rounded-2xl border border-border bg-card p-5">
+            <div
+              key={t.id}
+              className="border-border bg-card flex flex-col rounded-2xl border p-5"
+            >
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-0.5">
                   {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="size-3.5 fill-primary text-primary" />
+                    <Star key={i} className="fill-primary text-primary size-3.5" />
                   ))}
                 </span>
-                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${t.activo ? "bg-chart-5/15 text-[color:var(--chart-5)]" : "bg-secondary text-muted-foreground"}`}>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${t.activo ? "bg-chart-5/15 text-[color:var(--chart-5)]" : "bg-secondary text-muted-foreground"}`}
+                >
                   {t.activo ? "Activo" : "Inactivo"}
                 </span>
               </div>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground/85">“{t.texto}”</p>
+              <p className="text-foreground/85 mt-3 flex-1 text-sm leading-relaxed">
+                “{t.texto}”
+              </p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">{t.nombre}</span>
+                <span className="text-foreground text-sm font-semibold">{t.nombre}</span>
                 <div className="flex items-center gap-1">
-                  <Link href={`/admin/testimonios/${t.id}/editar`} aria-label="Editar" className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-secondary hover:text-foreground">
+                  <Link
+                    href={`/admin/testimonios/${t.id}/editar`}
+                    aria-label="Editar"
+                    className="text-foreground/70 hover:bg-secondary hover:text-foreground inline-flex size-9 items-center justify-center rounded-lg"
+                  >
                     <Pencil className="size-4" />
                   </Link>
                   <form action={toggleActivoTestimonio.bind(null, t.id)}>
-                    <button type="submit" aria-label={t.activo ? "Desactivar" : "Activar"} className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-secondary hover:text-foreground">
+                    <button
+                      type="submit"
+                      aria-label={t.activo ? "Desactivar" : "Activar"}
+                      className="text-foreground/70 hover:bg-secondary hover:text-foreground inline-flex size-9 items-center justify-center rounded-lg"
+                    >
                       <Power className="size-4" />
                     </button>
                   </form>
                   <form action={eliminarTestimonio.bind(null, t.id)}>
-                    <button type="submit" aria-label="Eliminar" className="inline-flex size-9 items-center justify-center rounded-lg text-foreground/70 hover:bg-destructive/10 hover:text-destructive">
+                    <button
+                      type="submit"
+                      aria-label="Eliminar"
+                      className="text-foreground/70 hover:bg-destructive/10 hover:text-destructive inline-flex size-9 items-center justify-center rounded-lg"
+                    >
                       <Trash2 className="size-4" />
                     </button>
                   </form>

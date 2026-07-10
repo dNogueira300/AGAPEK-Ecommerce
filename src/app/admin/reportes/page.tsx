@@ -77,47 +77,64 @@ export default async function AdminReportes() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">Reportes</h1>
+      <h1 className="font-display text-foreground text-2xl font-semibold sm:text-3xl">
+        Reportes
+      </h1>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         {kpis.map((k) => (
-          <div key={k.label} className="rounded-2xl border border-border bg-card p-5">
+          <div key={k.label} className="border-border bg-card rounded-2xl border p-5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{k.label}</span>
-              <k.icon className="size-5 text-primary" />
+              <span className="text-muted-foreground text-sm">{k.label}</span>
+              <k.icon className="text-primary size-5" />
             </div>
-            <p className="mt-3 font-display text-2xl font-semibold text-foreground">{k.value}</p>
+            <p className="font-display text-foreground mt-3 text-2xl font-semibold">
+              {k.value}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-border bg-card p-5">
-          <h2 className="mb-4 font-display text-lg font-semibold text-foreground">Ventas por mes</h2>
-          <VentasMesBar labels={meses.map((m) => m.label)} data={meses.map((m) => sumMes.get(m.key) ?? 0)} />
+        <section className="border-border bg-card rounded-2xl border p-5">
+          <h2 className="font-display text-foreground mb-4 text-lg font-semibold">
+            Ventas por mes
+          </h2>
+          <VentasMesBar
+            labels={meses.map((m) => m.label)}
+            data={meses.map((m) => sumMes.get(m.key) ?? 0)}
+          />
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-5">
-          <h2 className="mb-4 font-display text-lg font-semibold text-foreground">Pedidos por estado</h2>
+        <section className="border-border bg-card rounded-2xl border p-5">
+          <h2 className="font-display text-foreground mb-4 text-lg font-semibold">
+            Pedidos por estado
+          </h2>
           {porEstado.length > 0 ? (
             <EstadoDoughnut
               labels={porEstado.map((e) => ESTADO_LABEL[e.estado] ?? e.estado)}
               data={porEstado.map((e) => e._count._all)}
             />
           ) : (
-            <p className="py-16 text-center text-sm text-muted-foreground">Aún no hay pedidos.</p>
+            <p className="text-muted-foreground py-16 text-center text-sm">
+              Aún no hay pedidos.
+            </p>
           )}
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
-          <h2 className="mb-4 font-display text-lg font-semibold text-foreground">Productos más vendidos</h2>
+        <section className="border-border bg-card rounded-2xl border p-5 lg:col-span-2">
+          <h2 className="font-display text-foreground mb-4 text-lg font-semibold">
+            Productos más vendidos
+          </h2>
           {topItems.length > 0 ? (
             <TopProductosBar
               labels={topItems.map((t) => nombres.get(t.productoId) ?? "—")}
               data={topItems.map((t) => t._sum.cantidad ?? 0)}
             />
           ) : (
-            <p className="py-16 text-center text-sm text-muted-foreground">Aún no hay ventas registradas.</p>
+            <p className="text-muted-foreground py-16 text-center text-sm">
+              Aún no hay ventas registradas.
+            </p>
           )}
         </section>
       </div>

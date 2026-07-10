@@ -76,8 +76,8 @@ export function ConfigForm({
   const [iconoPreview, setIconoPreview] = useState<string | null>(null);
 
   return (
-    <form action={formAction} className="max-w-3xl space-y-6">
-      <section className="border-border bg-card space-y-4 rounded-2xl border p-6">
+    <form action={formAction} className="grid items-start gap-6 lg:grid-cols-2">
+      <section className="border-border bg-card space-y-4 rounded-2xl border p-6 lg:order-1">
         <h2 className="font-display text-foreground text-lg font-semibold">
           Logo de la tienda
         </h2>
@@ -115,7 +115,7 @@ export function ConfigForm({
         </div>
       </section>
 
-      <section className="border-border bg-card space-y-4 rounded-2xl border p-6">
+      <section className="border-border bg-card space-y-4 rounded-2xl border p-6 lg:order-3">
         <h2 className="font-display text-foreground text-lg font-semibold">Contacto</h2>
         <Campo
           name="whatsapp"
@@ -125,7 +125,7 @@ export function ConfigForm({
         <Campo name="horario" label="Horario de atención" value={values.horario} />
       </section>
 
-      <section className="border-border bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2">
+      <section className="border-border bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2 lg:order-4">
         <div className="sm:col-span-2">
           <h2 className="font-display text-foreground text-lg font-semibold">Pagos</h2>
         </div>
@@ -135,7 +135,7 @@ export function ConfigForm({
         <Campo name="cci" label="CCI" value={values.cci} />
       </section>
 
-      <section className="border-border bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2">
+      <section className="border-border bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2 lg:order-5">
         <div className="sm:col-span-2">
           <h2 className="font-display text-foreground text-lg font-semibold">
             Delivery (Iquitos)
@@ -155,7 +155,7 @@ export function ConfigForm({
         />
       </section>
 
-      <section className="border-border bg-card space-y-4 rounded-2xl border p-6">
+      <section className="border-border bg-card space-y-4 rounded-2xl border p-6 lg:order-2">
         <h2 className="font-display text-foreground text-lg font-semibold">
           Banner de asesoría del home
         </h2>
@@ -194,7 +194,7 @@ export function ConfigForm({
         </div>
       </section>
 
-      <section className="border-border bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2">
+      <section className="border-border bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2 lg:order-6 lg:col-span-2">
         <div className="sm:col-span-2">
           <h2 className="font-display text-foreground text-lg font-semibold">
             Redes sociales
@@ -316,7 +316,7 @@ export function ConfigForm({
         </div>
       </section>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 lg:order-7 lg:col-span-2">
         <button
           type="submit"
           disabled={pending}
