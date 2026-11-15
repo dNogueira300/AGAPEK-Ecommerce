@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export interface Opcion {
   value: string;
@@ -23,6 +22,42 @@ const NECESIDADES: Opcion[] = [
   { value: "iluminar", label: "Iluminar" },
   { value: "limpiar", label: "Limpiar" },
 ];
+
+function Seccion({
+  titulo,
+  keyName,
+  opciones,
+  isChecked,
+  onToggle,
+}: {
+  titulo: string;
+  keyName: string;
+  opciones: Opcion[];
+  isChecked: (key: string, value: string) => boolean;
+  onToggle: (key: string, value: string) => void;
+}) {
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-semibold text-foreground">{titulo}</h3>
+      <div className="space-y-1.5">
+        {opciones.map((o) => (
+          <label
+            key={o.value}
+            className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80"
+          >
+            <input
+              type="checkbox"
+              checked={isChecked(keyName, o.value)}
+              onChange={() => onToggle(keyName, o.value)}
+              className="size-4 rounded border-input accent-[color:var(--primary)]"
+            />
+            {o.label}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function CatalogSidebar({
   categorias,
@@ -76,36 +111,6 @@ export function CatalogSidebar({
       0,
     );
 
-  const Seccion = ({
-    titulo,
-    keyName,
-    opciones,
-  }: {
-    titulo: string;
-    keyName: string;
-    opciones: Opcion[];
-  }) => (
-    <div>
-      <h3 className="mb-2 text-sm font-semibold text-foreground">{titulo}</h3>
-      <div className="space-y-1.5">
-        {opciones.map((o) => (
-          <label
-            key={o.value}
-            className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80"
-          >
-            <input
-              type="checkbox"
-              checked={isChecked(keyName, o.value)}
-              onChange={() => toggleMulti(keyName, o.value)}
-              className="size-4 rounded border-input accent-[color:var(--primary)]"
-            />
-            {o.label}
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-
   const contenido = (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -120,10 +125,10 @@ export function CatalogSidebar({
           </button>
         )}
       </div>
-      {categorias.length > 0 && <Seccion titulo="Categorías" keyName="cat" opciones={categorias} />}
-      {marcas.length > 0 && <Seccion titulo="Marcas" keyName="marca" opciones={marcas} />}
-      <Seccion titulo="Tipo de piel" keyName="piel" opciones={TIPOS_PIEL} />
-      <Seccion titulo="Necesidad" keyName="nec" opciones={NECESIDADES} />
+      {categorias.length > 0 && <Seccion isChecked={isChecked} onToggle={toggleMulti} titulo="Categorías" keyName="cat" opciones={categorias} />}
+      {marcas.length > 0 && <Seccion isChecked={isChecked} onToggle={toggleMulti} titulo="Marcas" keyName="marca" opciones={marcas} />}
+      <Seccion isChecked={isChecked} onToggle={toggleMulti} titulo="Tipo de piel" keyName="piel" opciones={TIPOS_PIEL} />
+      <Seccion isChecked={isChecked} onToggle={toggleMulti} titulo="Necesidad" keyName="nec" opciones={NECESIDADES} />
       <div>
         <h3 className="mb-2 text-sm font-semibold text-foreground">Precio</h3>
         <div className="flex items-center gap-2">
