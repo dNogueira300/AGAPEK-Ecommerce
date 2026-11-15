@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { ROLES_ADMIN } from "@/lib/auth";
+import { mensajeErrorPassword, passwordSchema } from "@/lib/password";
 
 export interface AuthState {
   error?: string;
@@ -14,7 +15,7 @@ export interface AuthState {
 const registroSchema = z.object({
   nombre: z.string().min(2, "Ingresa tu nombre."),
   email: z.string().email("Correo inválido."),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+  password: passwordSchema,
 });
 
 const loginSchema = z.object({
@@ -126,7 +127,7 @@ export async function solicitarResetAction(
 
 const passSchema = z
   .object({
-    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+    password: passwordSchema,
     confirmar: z.string(),
   })
   .refine((d) => d.password === d.confirmar, {
@@ -147,9 +148,14 @@ export async function actualizarPasswordAction(
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) {
+    if (error.code === "weak_password" || error.code === "same_password") {
+      return { error: mensajeErrorPassword(error) };
+    }
     return { error: "El enlace expiró o no es válido. Solicita uno nuevo." };
   }
-  redirect("/login?reset=ok");
+  // Cierra la sesión de recuperación (y cualquier otra) para entrar con la nueva.
+  await supabase.auth.signOut({ scope: "global" });
+  redirect("/login?aviso=password");
 }
 
 export async function signOutAction(): Promise<void> {

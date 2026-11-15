@@ -68,7 +68,7 @@ export default async function AdminUsuarios() {
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <CambiarPassword id={p.id} />
+                  <CambiarPassword id={p.id} propia={p.id === yo.perfil.id} />
                 </td>
               </tr>
             ))}
