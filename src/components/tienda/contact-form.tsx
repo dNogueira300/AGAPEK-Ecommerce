@@ -14,7 +14,7 @@ export function ContactForm({ whatsapp }: { whatsapp: string | null }) {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!whatsapp) return;
-    const texto = `¡Hola AGAPEK! 🌸 Soy ${nombre || "un cliente"}.\n${mensaje}`;
+    const texto = `¡Hola AGAPEK! Soy ${nombre || "un cliente"}.\n${mensaje}`;
     window.open(urlWhatsApp(whatsapp, texto), "_blank", "noopener,noreferrer");
   };
 

@@ -68,7 +68,7 @@ export default async function ProductoPage({
     whatsapp &&
     urlWhatsApp(
       whatsapp,
-      `¡Hola AGAPEK! 🌸 Quiero consultar por el producto *${producto.nombre}* (${producto.codigo}).`,
+      `¡Hola AGAPEK! Quiero consultar por el producto *${producto.nombre}* (${producto.codigo}).`,
     );
 
   return (

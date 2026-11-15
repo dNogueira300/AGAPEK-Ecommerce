@@ -39,7 +39,7 @@ export function toProductCard(
     stock: p.stock,
     reviews: pseudoReviews(p.slug),
     consultaUrl: whatsapp
-      ? urlWhatsApp(whatsapp, `¡Hola AGAPEK! 🌸 Quiero consultar por *${p.nombre}*.`)
+      ? urlWhatsApp(whatsapp, `¡Hola AGAPEK! Quiero consultar por *${p.nombre}*.`)
       : null,
     rating: 5,
   };

@@ -75,7 +75,7 @@ export default async function RutinasPage({
   const waUrl = whatsapp
     ? urlWhatsApp(
         whatsapp,
-        "¡Hola AGAPEK! 🌸 Quiero asesoría para armar mi rutina de skincare.",
+        "¡Hola AGAPEK! Quiero asesoría para armar mi rutina de skincare.",
       )
     : null;
 
