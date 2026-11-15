@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertTriangle, Clock, DollarSign, Package, ShoppingCart } from "lucide-react";
+import { AlertTriangle, Clock, DollarSign, Package } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatFecha } from "@/lib/date";
 import { SalesChart } from "@/components/admin/sales-chart";
@@ -20,6 +20,11 @@ const ESTADO_LABEL: Record<string, string> = {
   ENTREGADO: "Entregado",
   CANCELADO: "Cancelado",
 };
+
+/** Fecha de hace `dias` días (fuera del render para que el componente sea puro). */
+function haceDias(dias: number): Date {
+  return new Date(Date.now() - dias * 86400000);
+}
 
 export default async function AdminDashboard() {
   const [productos, pendientes, ingresos, bajoStock, recientes, lowStockList] =
@@ -47,12 +52,12 @@ export default async function AdminDashboard() {
 
   // Serie de ventas de los últimos 7 días (hora Lima).
   const dias = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(Date.now() - (6 - i) * 86400000);
+    const d = haceDias(6 - i);
     return { key: formatFecha(d, "yyyy-MM-dd"), label: formatFecha(d, "dd/MM") };
   });
   const ventas7 = await prisma.pedido.findMany({
     where: {
-      createdAt: { gte: new Date(Date.now() - 7 * 86400000) },
+      createdAt: { gte: haceDias(7) },
       estado: { notIn: ["CANCELADO"] },
     },
     select: { total: true, createdAt: true },

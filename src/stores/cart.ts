@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -68,9 +68,13 @@ export const contarItems = (items: CartItem[]) =>
 export const subtotalCarrito = (items: CartItem[]) =>
   items.reduce((s, i) => s + i.precio * i.cantidad, 0);
 
+const sinSuscripcion = () => () => {};
+
 /** Evita hydration mismatch: false en el primer render (servidor), true tras montar. */
 export function useCartHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  return hydrated;
+  return useSyncExternalStore(
+    sinSuscripcion,
+    () => true,
+    () => false,
+  );
 }
