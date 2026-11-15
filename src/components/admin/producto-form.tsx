@@ -63,7 +63,7 @@ export function ProductoForm({
   ) => (
     <label
       key={value}
-      className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm capitalize text-foreground/80 has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-foreground"
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-foreground/80 has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-foreground ${text === value ? "capitalize" : ""}`}
     >
       <input
         type="checkbox"
@@ -135,6 +135,7 @@ export function ProductoForm({
           <div>
             <p className={`${label} mb-2`}>Tipo de piel</p>
             <div className="flex flex-wrap gap-2">
+              {chip("tipoPiel", "todas", producto?.tipoPiel.includes("todas") ?? false, "Todo tipo de piel")}
               {TIPOS_PIEL.map((t) => chip("tipoPiel", t, producto?.tipoPiel.includes(t) ?? false, t))}
             </div>
           </div>

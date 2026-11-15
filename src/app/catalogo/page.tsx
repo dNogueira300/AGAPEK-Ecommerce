@@ -67,7 +67,8 @@ export default async function CatalogoPage({
     activo: true,
     ...(cats.length ? { categoria: { is: { slug: { in: cats } } } } : {}),
     ...(marcasF.length ? { marca: { is: { slug: { in: marcasF } } } } : {}),
-    ...(piel.length ? { tipoPiel: { hasSome: piel } } : {}),
+    // Los productos "todas" (todo tipo de piel) aparecen con cualquier filtro de piel.
+    ...(piel.length ? { tipoPiel: { hasSome: [...piel, "todas"] } } : {}),
     ...(nec.length ? { necesidad: { hasSome: nec } } : {}),
     ...(precioFilter ? { precio: precioFilter } : {}),
     ...(busqueda
