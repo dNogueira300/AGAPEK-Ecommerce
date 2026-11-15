@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Loader2 } from "lucide-react";
 import {
   actualizarPasswordAction,
@@ -11,6 +11,7 @@ import {
   type AuthState,
 } from "@/lib/auth-actions";
 import { GoogleButton } from "@/components/tienda/google-button";
+import { PasswordRequisitos } from "@/components/tienda/password-requisitos";
 
 const inputClass =
   "h-11 w-full rounded-xl border border-input bg-card px-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30";
@@ -132,13 +133,13 @@ export function NewPasswordForm() {
         <label className={labelClass} htmlFor="password">
           Nueva contraseña
         </label>
-        <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" className={inputClass} placeholder="Mínimo 6 caracteres" />
+        <PasswordNueva />
       </div>
       <div className="space-y-1.5">
         <label className={labelClass} htmlFor="confirmar">
           Confirmar contraseña
         </label>
-        <input id="confirmar" name="confirmar" type="password" required minLength={6} autoComplete="new-password" className={inputClass} placeholder="Repite la contraseña" />
+        <input id="confirmar" name="confirmar" type="password" required minLength={8} autoComplete="new-password" className={inputClass} placeholder="Repite la contraseña" />
       </div>
       <Feedback state={state} />
       <SubmitButton pending={pending}>Guardar contraseña</SubmitButton>
@@ -174,7 +175,7 @@ export function RegisterForm({ redirect = "/" }: { redirect?: string }) {
           <label className={labelClass} htmlFor="password">
             Contraseña
           </label>
-          <input id="password" name="password" type="password" required autoComplete="new-password" minLength={6} className={inputClass} placeholder="Mínimo 6 caracteres" />
+          <PasswordNueva />
         </div>
         <Feedback state={state} />
         <SubmitButton pending={pending}>Crear cuenta</SubmitButton>
@@ -186,5 +187,27 @@ export function RegisterForm({ redirect = "/" }: { redirect?: string }) {
         </Link>
       </p>
     </div>
+  );
+}
+
+/** Campo de contraseña nueva con el checklist de requisitos en vivo. */
+function PasswordNueva() {
+  const [valor, setValor] = useState("");
+  return (
+    <>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        required
+        minLength={8}
+        autoComplete="new-password"
+        value={valor}
+        onChange={(e) => setValor(e.target.value)}
+        className={inputClass}
+        placeholder="Mínimo 8 caracteres"
+      />
+      <PasswordRequisitos valor={valor} />
+    </>
   );
 }

@@ -1,10 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { Rol } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUser, requireRoles } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mensajeErrorPassword, passwordSchema } from "@/lib/password";
 
 const ROLES = Object.values(Rol);
 
@@ -56,25 +59,48 @@ export interface PasswordState {
   error?: string;
 }
 
-/** Cambia la contraseña de cualquier usuario (incluido uno mismo) vía service role. */
+/**
+ * Cambia la contraseña de cualquier usuario (incluido uno mismo) vía service role.
+ * Supabase revoca las sesiones de ese usuario al cambiarla; si es la propia
+ * cuenta se cierra sesión en todos lados y se redirige al login.
+ */
 export async function cambiarPasswordUsuario(
   _prev: PasswordState,
   formData: FormData,
 ): Promise<PasswordState> {
-  await requireRoles(["ADMIN", "TECNICO"]);
+  let actualId: string;
+  try {
+    actualId = (await requireRoles(["ADMIN", "TECNICO"])).perfil.id;
+  } catch {
+    return { error: "Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo." };
+  }
 
   const id = String(formData.get("id") ?? "");
-  const password = String(formData.get("password") ?? "");
   if (!id) return { error: "Usuario inválido." };
-  if (password.length < 6)
-    return { error: "La contraseña debe tener al menos 6 caracteres." };
+  const parsed = passwordSchema.safeParse(String(formData.get("password") ?? ""));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
   try {
     const admin = createAdminClient();
-    const { error } = await admin.auth.admin.updateUserById(id, { password });
-    if (error) return { error: "No se pudo cambiar la contraseña." };
-  } catch {
-    return { error: "No se pudo cambiar la contraseña." };
+    const { error } = await admin.auth.admin.updateUserById(id, {
+      password: parsed.data,
+    });
+    if (error) {
+      console.error("[cambiarPasswordUsuario]", error.code, error.message, error);
+      return { error: mensajeErrorPassword(error) };
+    }
+  } catch (e) {
+    console.error("[cambiarPasswordUsuario]", e);
+    return { error: "No se pudo conectar con el servidor de autenticación." };
+  }
+
+  // Propia cuenta (el usuario ya confirmó el aviso): cerrar sesión en todos los
+  // dispositivos y volver al login. Si Supabase ya revocó las sesiones al cambiar
+  // la contraseña, signOut solo limpia las cookies locales.
+  if (id === actualId) {
+    const supabase = await createClient();
+    await supabase.auth.signOut({ scope: "global" });
+    redirect("/login?aviso=password");
   }
   return { ok: true };
 }

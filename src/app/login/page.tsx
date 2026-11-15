@@ -14,16 +14,22 @@ const ERRORES: Record<string, string> = {
     "No pudimos completar el acceso. Si venías de un correo de recuperación, ábrelo en el mismo navegador donde lo solicitaste o pide un enlace nuevo.",
 };
 
+const AVISOS: Record<string, string> = {
+  password:
+    "Tu contraseña se cambió y se cerró la sesión en todos tus dispositivos. Inicia sesión con la nueva contraseña.",
+};
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string; error?: string }>;
+  searchParams: Promise<{ redirect?: string; error?: string; aviso?: string }>;
 }) {
-  const { redirect: to, error } = await searchParams;
+  const { redirect: to, error, aviso } = await searchParams;
   const destino = to?.startsWith("/") ? to : "/";
   const user = await getUser();
   if (user) redirect(destino);
   const mensajeError = error ? ERRORES[error] : undefined;
+  const mensajeAviso = aviso ? AVISOS[aviso] : undefined;
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12 sm:px-6">
@@ -38,6 +44,11 @@ export default async function LoginPage({
           Inicia sesión para continuar tu compra.
         </p>
       </div>
+      {mensajeAviso && (
+        <p className="bg-secondary text-foreground mb-4 rounded-xl px-4 py-3 text-sm font-medium">
+          {mensajeAviso}
+        </p>
+      )}
       {mensajeError && (
         <p className="bg-destructive/10 text-destructive mb-4 rounded-xl px-4 py-3 text-sm font-medium">
           {mensajeError}
