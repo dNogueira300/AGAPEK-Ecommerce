@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { comprimirInput } from "@/lib/comprimir-imagen";
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import {
@@ -132,6 +133,7 @@ export function RutinaForm({
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => {
+                  void comprimirInput(e.currentTarget);
                   const f = e.target.files?.[0];
                   setPreview(f ? URL.createObjectURL(f) : rutina?.portadaUrl ?? null);
                 }}

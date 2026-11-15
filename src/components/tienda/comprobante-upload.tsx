@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, Upload } from "lucide-react";
 import { subirComprobante } from "@/lib/checkout-actions";
+import { comprimirInput } from "@/lib/comprimir-imagen";
 
 export function ComprobanteUpload({ codigo }: { codigo: string }) {
   const router = useRouter();
@@ -32,7 +33,10 @@ export function ComprobanteUpload({ codigo }: { codigo: string }) {
           name="comprobante"
           accept="image/*,application/pdf"
           required
-          onChange={(e) => setNombre(e.target.files?.[0]?.name ?? null)}
+          onChange={(e) => {
+            void comprimirInput(e.currentTarget);
+            setNombre(e.target.files?.[0]?.name ?? null);
+          }}
           className="hidden"
         />
       </label>

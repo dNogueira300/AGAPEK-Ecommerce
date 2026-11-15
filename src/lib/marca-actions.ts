@@ -37,7 +37,11 @@ export async function guardarMarca(
   _prev: MarcaState,
   formData: FormData,
 ): Promise<MarcaState> {
-  await requireAdmin();
+  try {
+    await requireAdmin();
+  } catch {
+    return { error: "Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo." };
+  }
   const id = (formData.get("id") as string) || null;
   const parsed = schema.safeParse({
     nombre: formData.get("nombre"),
@@ -54,17 +58,25 @@ export async function guardarMarca(
 
   const file = formData.get("logo");
   let logoUrl: string | undefined;
-  if (file instanceof File && file.size > 0) logoUrl = await subirLogo(file, slug);
+  try {
+    if (file instanceof File && file.size > 0) logoUrl = await subirLogo(file, slug);
+  } catch {
+    return { error: "No se pudo procesar el logo. Prueba con otra imagen (JPG, PNG o WebP)." };
+  }
 
-  if (id) {
-    await prisma.marca.update({
-      where: { id },
-      data: { nombre, slug, aliada, ...(logoUrl ? { logoUrl } : {}) },
-    });
-  } else {
-    await prisma.marca.create({
-      data: { nombre, slug, aliada, logoUrl: logoUrl ?? null },
-    });
+  try {
+    if (id) {
+      await prisma.marca.update({
+        where: { id },
+        data: { nombre, slug, aliada, ...(logoUrl ? { logoUrl } : {}) },
+      });
+    } else {
+      await prisma.marca.create({
+        data: { nombre, slug, aliada, logoUrl: logoUrl ?? null },
+      });
+    }
+  } catch {
+    return { error: "No se pudo guardar la marca. Intenta de nuevo." };
   }
 
   revalidatePath("/admin/marcas");
