@@ -168,9 +168,9 @@ export default async function ProductoPage({
               {producto.tipoPiel.map((x) => (
                 <span
                   key={`t-${x}`}
-                  className="bg-secondary text-secondary-foreground inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize"
+                  className={`bg-secondary text-secondary-foreground inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${x === "todas" ? "" : "capitalize"}`}
                 >
-                  Piel {x}
+                  {x === "todas" ? "Todo tipo de piel" : `Piel ${x}`}
                 </span>
               ))}
             </div>
