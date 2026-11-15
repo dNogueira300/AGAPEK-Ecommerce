@@ -104,7 +104,7 @@ export async function togglePublicado(id: string) {
 
 export async function eliminarPost(id: string) {
   await requireBlog();
-  await prisma.post.delete({ where: { id } });
+  await prisma.post.deleteMany({ where: { id } });
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
 }

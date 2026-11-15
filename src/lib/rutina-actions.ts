@@ -132,7 +132,7 @@ export async function togglePublicadoRutina(id: string) {
 
 export async function eliminarRutina(id: string) {
   await requireContenido();
-  await prisma.rutina.delete({ where: { id } });
+  await prisma.rutina.deleteMany({ where: { id } });
   revalidatePath("/admin/rutinas");
   revalidatePath("/rutinas");
 }

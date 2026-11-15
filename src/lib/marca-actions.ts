@@ -89,7 +89,8 @@ export async function eliminarMarca(id: string) {
   await requireAdmin();
   const n = await prisma.producto.count({ where: { marcaId: id } });
   if (n === 0) {
-    await prisma.marca.delete({ where: { id } });
+    // deleteMany no falla si ya se borró (doble toque o pestaña desactualizada).
+    await prisma.marca.deleteMany({ where: { id } });
     revalidatePath("/admin/marcas");
     invalidarTag("marcas");
   }
