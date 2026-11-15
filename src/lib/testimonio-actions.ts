@@ -63,7 +63,7 @@ export async function toggleActivoTestimonio(id: string) {
 
 export async function eliminarTestimonio(id: string) {
   await requireContenido();
-  await prisma.testimonio.delete({ where: { id } });
+  await prisma.testimonio.deleteMany({ where: { id } });
   revalidatePath("/admin/testimonios");
   revalidatePath("/");
   invalidarTag("testimonios");

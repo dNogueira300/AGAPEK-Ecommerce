@@ -109,7 +109,7 @@ export async function toggleActivoBanner(id: string) {
 
 export async function eliminarBanner(id: string) {
   await requireContenido();
-  await prisma.banner.delete({ where: { id } });
+  await prisma.banner.deleteMany({ where: { id } });
   revalidatePath("/admin/banners");
   revalidatePath("/");
   invalidarTag("banners");

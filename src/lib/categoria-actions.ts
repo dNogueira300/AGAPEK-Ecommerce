@@ -47,7 +47,7 @@ export async function eliminarCategoria(id: string) {
   await requireAdmin();
   const n = await prisma.producto.count({ where: { categoriaId: id } });
   if (n === 0) {
-    await prisma.categoria.delete({ where: { id } });
+    await prisma.categoria.deleteMany({ where: { id } });
     revalidatePath("/admin/categorias");
     invalidarTag("categorias");
   }

@@ -148,7 +148,7 @@ export async function eliminarProducto(id: string) {
   if (enPedidos > 0) {
     await prisma.producto.update({ where: { id }, data: { activo: false } });
   } else {
-    await prisma.producto.delete({ where: { id } });
+    await prisma.producto.deleteMany({ where: { id } });
   }
   revalidatePath("/admin/productos");
   revalidatePath("/catalogo");

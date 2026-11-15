@@ -29,6 +29,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp"],
+  // Los formularios con imagen la envían por Server Action (límite por defecto:
+  // 1 MB). Se comprimen en el navegador, pero se deja margen hasta el tope de
+  // Vercel (4.5 MB por request).
+  experimental: {
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   images: {
     remotePatterns: [
       {

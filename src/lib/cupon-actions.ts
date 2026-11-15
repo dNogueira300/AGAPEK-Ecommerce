@@ -144,6 +144,6 @@ export async function toggleActivoCupon(id: string) {
 
 export async function eliminarCupon(id: string) {
   await requireContenido();
-  await prisma.cupon.delete({ where: { id } });
+  await prisma.cupon.deleteMany({ where: { id } });
   revalidatePath("/admin/cupones");
 }

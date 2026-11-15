@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { comprimirInput } from "@/lib/comprimir-imagen";
 import { useActionState, useState } from "react";
 import { Check, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
 import { guardarConfiguracion, type ConfigState } from "@/lib/config-actions";
@@ -105,6 +106,7 @@ export function ConfigForm({
               name="logo"
               accept="image/*"
               onChange={(e) => {
+                void comprimirInput(e.currentTarget);
                 const f = e.target.files?.[0];
                 setLogoPreview(f ? URL.createObjectURL(f) : logoUrl);
               }}
@@ -134,6 +136,7 @@ export function ConfigForm({
               name="favicon"
               accept="image/*"
               onChange={(e) => {
+                void comprimirInput(e.currentTarget);
                 const f = e.target.files?.[0];
                 setFaviconPreview(f ? URL.createObjectURL(f) : faviconUrl);
               }}
@@ -213,6 +216,7 @@ export function ConfigForm({
               name="cta_imagen"
               accept="image/*"
               onChange={(e) => {
+                void comprimirInput(e.currentTarget);
                 const f = e.target.files?.[0];
                 setCtaPreview(f ? URL.createObjectURL(f) : ctaUrl);
               }}
@@ -311,6 +315,7 @@ export function ConfigForm({
                 name="red_nueva_icono"
                 accept="image/*"
                 onChange={(e) => {
+                  void comprimirInput(e.currentTarget);
                   const f = e.target.files?.[0];
                   setIconoPreview(f ? URL.createObjectURL(f) : null);
                 }}

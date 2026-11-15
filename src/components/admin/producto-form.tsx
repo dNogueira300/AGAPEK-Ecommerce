@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { comprimirInput } from "@/lib/comprimir-imagen";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { ImagePlus, Loader2 } from "lucide-react";
@@ -166,6 +167,7 @@ export function ProductoForm({
               name="imagen"
               accept="image/*"
               onChange={(e) => {
+                void comprimirInput(e.currentTarget);
                 const f = e.target.files?.[0];
                 setPreview(f ? URL.createObjectURL(f) : producto?.imagen ?? null);
               }}
